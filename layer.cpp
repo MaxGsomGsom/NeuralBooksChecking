@@ -1,38 +1,47 @@
 #include "layer.h"
 #include <cstdlib>
+#include <cmath>
 
-Layer::Layer()
+float OutputLayer::EstimateError(vector<float>* desiredoutput)
 {
-}
-
-Layer::~Layer()
-{
-}
-
-void Layer::Create(int inputsize, int neuroncount)
-{
-    neurons.resize(neuroncount);
-    for (int i = 0; i < neuroncount; i++)
-    {
-        neurons[i].Create(inputsize);
-    }
-
-    layerinput.resize(inputsize);
-}
-
-//Calculates the neural network result of the layer using the sigmoid function
-void Layer::Calculate()
-{
-    //Apply the formula for each neuron
+    float errorg = 0;
     for (uint i = 0; i < neurons.size(); i++)
     {
-        neurons[i].Calculate(&layerinput);
+        //The general error is the sum of delta values. Where delta is the squared difference
+        //of the desired value with the output value
+        errorg += pow((desiredoutput->at(i) - neurons[i].output), 2.f);
     }
+
+    return errorg / 2;
 }
 
-void Layer::Train()
+float OutputLayer::Train(vector<float>* desiredoutput, float alpha, float momentum)
+{
+    float errsum = 0;
+    for (uint i = 0; i < neurons.size(); i++)
+    {
+        errsum += neurons[i].Train(desiredoutput->at(i), &layerinput, alpha, momentum);
+    }
+
+    return errsum;
+}
+
+float HiddenLayer::Train(float errsum, float alpha, float momentum)
 {
 
+    float csum = 0;
+    for (uint j = 0; j < neurons.size(); j++)
+    {
+        csum += neurons[j].Train(&layerinput, errsum, alpha, momentum);
+    }
+    return csum;
 }
 
+void InputLayer::Train(float errsum, float alpha, float momentum)
+{
+    for (uint i = 0; i < neurons.size(); i++)
+    {
+        neurons[i].Train(&layerinput, errsum, alpha, momentum);
+    }
+}
 

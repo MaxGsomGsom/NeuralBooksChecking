@@ -24,3 +24,5 @@ HEADERS  += mainwindow.h \
     neuronet.h
 
 FORMS    += mainwindow.ui
+
+CONFIG += c++11
