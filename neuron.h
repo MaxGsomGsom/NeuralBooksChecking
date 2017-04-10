@@ -7,17 +7,20 @@ using namespace std;
 
 class Neuron
 {
-public:
-    vector<float> weights; //Neuron input weights or synaptic connections
-    vector<float> deltavalues; //Neuron delta values
-    float output; //Output value
+protected:
     float gain; //Gain value (default = 1)
     float wgain; //Weight gain value
+    float output; //Output value
+    vector<float> weights; //Neuron input weights or synaptic connections
+    vector<float> deltavalues; //Neuron delta values
 
-    Neuron(); //Constructor
-    ~Neuron(); //Destructor
+public:
+    Neuron() {} //Constructor
+    ~Neuron() {} //Destructor
     void Create(int inputcount); //Allocates memory and initializates values
     void Calculate(vector<float>* input); //Calculates neuron with formula
+    float GetOutput() { return output; }
+    int InputCount() { return weights.size(); }
 };
 
 class InputNeuron: public Neuron {

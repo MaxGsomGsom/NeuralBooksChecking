@@ -12,8 +12,8 @@ private:
     vector<HiddenLayer> m_hiddenlayers; //Additional hidden layers
 
 public:
-    Neuronet();//Constructor
-    ~Neuronet();//Destructor
+    Neuronet() {} //Constructor
+    ~Neuronet() {} //Destructor
 
     //Creates the network structure on memory
     void Create(int inputcount, int inputneurons, int outputcount, vector<int>* hiddenlayers);
@@ -25,13 +25,10 @@ public:
     //and applying the backpropagation algorithm
     float Train(vector<float>* desiredoutput, vector<float>* input, float alpha, float momentum);
 
-    //Updates the next layer input values
-    void Update(int layerindex);
-
     //Returns the output layer. This is useful to get the output values of the network
-    OutputLayer& GetOutput()
+    vector<float> GetOutput()
     {
-        return m_outputlayer;
+        return m_outputlayer.GetOutput();
     }
 
 };

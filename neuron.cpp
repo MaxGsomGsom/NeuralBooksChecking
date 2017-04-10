@@ -2,9 +2,6 @@
 #include "cstdlib"
 #include <cmath>
 
-Neuron::Neuron(): output(0), gain(0), wgain(0) {}
-
-Neuron::~Neuron() {}
 
 //Initializates neuron weights
 void Neuron::Create(int inputcount)

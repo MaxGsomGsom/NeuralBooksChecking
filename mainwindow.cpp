@@ -82,7 +82,7 @@ void MainWindow::on_pushButton_clicked()
         net.Propagate(&pattern[i]);
 
         //display result
-        cout << "TESTED PATTERN " << i << " INPUT: " << pattern[i][0] << "," << pattern[i][1] << " DESIRED OUTPUT: " << desiredout[i][0] << " NET RESULT: " << net.GetOutput().neurons[0].output << endl;
+        cout << "TESTED PATTERN " << i << " INPUT: " << pattern[i][0] << "," << pattern[i][1] << " DESIRED OUTPUT: " << desiredout[i][0] << " NET RESULT: " << net.GetOutput()[0] << endl;
     }
 
 }

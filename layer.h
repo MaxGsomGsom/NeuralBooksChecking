@@ -8,10 +8,11 @@
 template<class T = Neuron>
 class Layer
 {
-public:
-    vector<T> neurons; //The array of neurons
+protected:
     vector<float> layerinput; //The layer input
+    vector<T> neurons; //The array of neurons
 
+public:
     Layer() {} //Constructor
     ~Layer() {} //Destructor
 
@@ -35,9 +36,26 @@ public:
         }
     }
 
+    int InputCount() { return layerinput.size(); }
+    int NeuronsCount() { return neurons.size(); }
+    T& Neuron(int i) {return neurons.at(i); }
+
+    void PushInput(vector<float>* input) {
+        copy(input->begin(), input->end(), layerinput.begin());
+    }
+
+    vector<float> GetOutput() {
+        vector<float> output;
+        for (int i=0; i<neurons.size(); i++){
+            output.push_back(neurons[i].GetOutput());
+        }
+        return output;
+    }
+
     //void Neurons(int i) = 0;
     //int Count() = 0;
 };
+
 
 class InputLayer: public Layer<InputNeuron>
 {

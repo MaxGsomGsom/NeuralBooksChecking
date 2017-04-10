@@ -1,14 +1,6 @@
 #include "neuronet.h"
 #include <cstdlib>
 
-Neuronet::Neuronet()
-{
-}
-
-Neuronet::~Neuronet()
-{
-}
-
 void Neuronet::Create(int inputcount, int inputneurons, int outputcount, vector<int>* hiddenlayers)
 {
     m_inputlayer.Create(inputcount, inputneurons);
@@ -41,22 +33,30 @@ void Neuronet::Propagate(vector<float>* input)
 {
     //The propagation function should start from the input layer
     //first copy the input vector to the input layer
-    copy(input->begin(), input->end(), m_inputlayer.layerinput.begin());
+    m_inputlayer.PushInput(input);
     //Now calculate the inputlayer
     m_inputlayer.Calculate();
 
-    Update(-1);//Propagate the inputlayer out values to the next layer
+    //Propagate the inputlayer out values to the next layer
+    vector<float> output = m_inputlayer.GetOutput();
+    m_hiddenlayers[0].PushInput(&output);
+
     if (m_hiddenlayers.size() > 0)
     {
         //Calculating hidden layers if any
         for (uint i = 0; i < m_hiddenlayers.size(); i++)
         {
             m_hiddenlayers[i].Calculate();
-            Update(i);
+
+            output = m_hiddenlayers[i].GetOutput();
+            //for all hidden layers, output of last hidden layer puts as input of outputlayer
+            if (i+1<m_hiddenlayers.size())
+                m_hiddenlayers[i+1].PushInput(&output);
         }
     }
 
-    //Calculating the final statge: the output layer
+    m_outputlayer.PushInput(&output);
+    //Calculating the final stage - the output layer
     m_outputlayer.Calculate();
 }
 
@@ -79,41 +79,4 @@ float Neuronet::Train(vector<float>* desiredoutput, vector<float>* input, float 
 
     //Return the general error
     return errorg;
-
 }
-
-void Neuronet::Update(int layerindex)
-{
-    if (layerindex == -1)
-    {
-        //Dealing with the inputlayer here and propagating to the next layer
-        for (uint i = 0; i < m_inputlayer.neurons.size(); i++)
-        {
-            if (m_hiddenlayers.size() > 0) //Propagate to the first hidden layer
-            {
-                m_hiddenlayers[0].layerinput[i] = m_inputlayer.neurons[i].output;
-            }
-            else //Propagate directly to the output layer
-            {
-                m_outputlayer.layerinput[i] = m_inputlayer.neurons[i].output;
-            }
-        }
-
-    }
-    else
-    {
-        for (uint i = 0; i < m_hiddenlayers[layerindex].neurons.size(); i++)
-        {
-            //Not the last hidden layer
-            if (layerindex < (int)m_hiddenlayers.size() - 1)
-            {
-                m_hiddenlayers[layerindex + 1].layerinput[i] = m_hiddenlayers[layerindex].neurons[i].output;
-            }
-            else
-            {
-                m_outputlayer.layerinput[i] = m_hiddenlayers[layerindex].neurons[i].output;
-            }
-        }
-    }
-}
-

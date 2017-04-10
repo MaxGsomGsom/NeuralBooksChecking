@@ -9,7 +9,7 @@ float OutputLayer::EstimateError(vector<float>* desiredoutput)
     {
         //The general error is the sum of delta values. Where delta is the squared difference
         //of the desired value with the output value
-        errorg += pow((desiredoutput->at(i) - neurons[i].output), 2.f);
+        errorg += pow((desiredoutput->at(i) - neurons[i].GetOutput()), 2.f);
     }
 
     return errorg / 2;
