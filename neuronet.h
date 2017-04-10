@@ -16,18 +16,18 @@ public:
     Neuronet();//Construction..initialzates all values to 0
     ~Neuronet();//Destructor..releases memory
     //Creates the network structure on memory
-    void Create(int inputcount,int inputneurons,int outputcount,vector<int> *hiddenlayers);
+    void Create(int inputcount, int inputneurons, int outputcount, vector<int>* hiddenlayers);
 
-    void Propagate(vector<float> *input);//Calculates the network values given an input pattern
+    void Propagate(vector<float>* input);//Calculates the network values given an input pattern
     //Updates the weight values of the network given a desired output and applying the backpropagation
     //Algorithm
-    float Train(vector<float> *desiredoutput,vector<float> *input,float alpha, float momentum);
+    float Train(vector<float>* desiredoutput, vector<float>* input, float alpha, float momentum);
 
     //Updates the next layer input values
     void Update(int layerindex);
 
     //Returns the output layer..this is useful to get the output values of the network
-    inline Layer &GetOutput()
+    inline Layer& GetOutput()
     {
         return m_outputlayer;
     }

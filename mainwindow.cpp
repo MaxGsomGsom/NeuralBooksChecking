@@ -12,7 +12,7 @@ using namespace std;
 #define NETWORK_OUTPUT 1
 
 
-MainWindow::MainWindow(QWidget *parent) :
+MainWindow::MainWindow(QWidget* parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
@@ -57,31 +57,32 @@ void MainWindow::on_pushButton_clicked()
     vector<int> hidden;
     hidden.push_back(5);
     //We create the network
-    net.Create(PATTERN_SIZE,NETWORK_INPUTNEURONS,NETWORK_OUTPUT, &hidden);
+    net.Create(PATTERN_SIZE, NETWORK_INPUTNEURONS, NETWORK_OUTPUT, &hidden);
 
     //Start the neural network training
-    for(int i=0;i<EPOCHS;i++)
+    for (int i = 0; i < EPOCHS; i++)
     {
-        error=0;
-        for(int j=0;j<PATTERN_COUNT;j++)
+        error = 0;
+        for (int j = 0; j < PATTERN_COUNT; j++)
         {
-            error+=net.Train(&(desiredout[j]),&(pattern[j]),0.2f,0.1f);
+            error += net.Train(&(desiredout[j]), &(pattern[j]), 0.2f, 0.1f);
         }
-        error/=PATTERN_COUNT;
+        error /= PATTERN_COUNT;
         //display error
         cout << "ERROR:" << error << "\r";
-        if (error<0.001) break;
+        if (error < 0.001)
+            break;
     }
 
     //once trained test all patterns
 
-    for(int i=0;i<PATTERN_COUNT;i++)
+    for (int i = 0; i < PATTERN_COUNT; i++)
     {
 
         net.Propagate(&pattern[i]);
 
-    //display result
-        cout << "TESTED PATTERN " << i << " INPUT: " << pattern[i][0] <<"," << pattern[i][1] << " DESIRED OUTPUT: " << desiredout[i][0] << " NET RESULT: "<< net.GetOutput().neurons[0].output << endl;
+        //display result
+        cout << "TESTED PATTERN " << i << " INPUT: " << pattern[i][0] << "," << pattern[i][1] << " DESIRED OUTPUT: " << desiredout[i][0] << " NET RESULT: " << net.GetOutput().neurons[0].output << endl;
     }
 
 }

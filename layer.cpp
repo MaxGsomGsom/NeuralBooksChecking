@@ -12,7 +12,7 @@ Layer::~Layer()
 void Layer::Create(int inputsize, int neuroncount)
 {
     neurons.resize(neuroncount);
-    for(int i=0;i<neuroncount;i++)
+    for (int i = 0; i < neuroncount; i++)
     {
         neurons[i].Create(inputsize);
     }
@@ -24,10 +24,15 @@ void Layer::Create(int inputsize, int neuroncount)
 void Layer::Calculate()
 {
     //Apply the formula for each neuron
-    for(uint i=0;i<neurons.size();i++)
+    for (uint i = 0; i < neurons.size(); i++)
     {
         neurons[i].Calculate(&layerinput);
     }
+}
+
+void Layer::Train()
+{
+
 }
 
 

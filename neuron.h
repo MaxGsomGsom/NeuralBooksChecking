@@ -17,7 +17,7 @@ public:
     Neuron();//Constructor
     ~Neuron();//Destructor
     void Create(int inputcount);//Allocates memory and initializates values
-    void Calculate(vector<float> *input);
+    void Calculate(vector<float>* input);
 };
 
 #endif // NEURON_H
