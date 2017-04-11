@@ -15,33 +15,33 @@ float OutputLayer::EstimateError(vector<float>* desiredoutput)
     return errorg / 2;
 }
 
-float OutputLayer::Train(vector<float>* desiredoutput, float alpha, float momentum)
+float OutputLayer::Train(vector<float>* desiredoutput)
 {
     float errsum = 0;
     for (uint i = 0; i < neurons.size(); i++)
     {
-        errsum += neurons[i].Train(desiredoutput->at(i), &layerinput, alpha, momentum);
+        errsum += neurons[i].Train(desiredoutput->at(i), &layerinput);
     }
 
     return errsum;
 }
 
-float HiddenLayer::Train(float errsum, float alpha, float momentum)
+float HiddenLayer::Train(float errsum)
 {
 
     float csum = 0;
     for (uint j = 0; j < neurons.size(); j++)
     {
-        csum += neurons[j].Train(&layerinput, errsum, alpha, momentum);
+        csum += neurons[j].Train(&layerinput, errsum);
     }
     return csum;
 }
 
-void InputLayer::Train(float errsum, float alpha, float momentum)
+void InputLayer::Train(float errsum)
 {
     for (uint i = 0; i < neurons.size(); i++)
     {
-        neurons[i].Train(&layerinput, errsum, alpha, momentum);
+        neurons[i].Train(&layerinput, errsum);
     }
 }
 

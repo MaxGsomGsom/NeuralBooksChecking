@@ -1,9 +1,15 @@
 #include "neuronet.h"
 #include <cstdlib>
+#include <cassert>
 
-void Neuronet::Create(int inputcount, int inputneurons, int outputcount, vector<int>* hiddenlayers)
+void Neuronet::Create(int inputcount, int inputneurons, int outputcount, vector<int>* hiddenlayers, float randgain)
 {
-    m_inputlayer.Create(inputcount, inputneurons);
+    assert(inputcount > 0 && inputneurons > 0 && outputcount > 0 && randgain > 0 && hiddenlayers);
+
+    this->inputsize = inputcount;
+    this->outputsize = outputcount;
+
+    m_inputlayer.Create(inputcount, inputneurons, randgain);
     if (hiddenlayers->size() > 0)
     {
         m_hiddenlayers.resize(hiddenlayers->size());
@@ -13,24 +19,26 @@ void Neuronet::Create(int inputcount, int inputneurons, int outputcount, vector<
             {
                 //First hidden layer receives the output of the inputlayer so we
                 //set as input the neuroncount of the inputlayer
-                m_hiddenlayers[i].Create(inputneurons, hiddenlayers->at(i));
+                m_hiddenlayers[i].Create(inputneurons, hiddenlayers->at(i), randgain);
             }
             else
             {
-                m_hiddenlayers[i].Create(hiddenlayers->at(i - 1), hiddenlayers->at(i));
+                m_hiddenlayers[i].Create(hiddenlayers->at(i - 1), hiddenlayers->at(i), randgain);
             }
         }
-        m_outputlayer.Create(hiddenlayers->at(hiddenlayers->size() - 1), outputcount);
+        m_outputlayer.Create(hiddenlayers->at(hiddenlayers->size() - 1), outputcount, randgain);
     }
     else
     {
-        m_outputlayer.Create(inputneurons, outputcount);
+        m_outputlayer.Create(inputneurons, outputcount, randgain);
     }
 }
 
 
 void Neuronet::Propagate(vector<float>* input)
 {
+    assert(input->size() == inputsize);
+
     //The propagation function should start from the input layer
     //first copy the input vector to the input layer
     m_inputlayer.PushInput(input);
@@ -50,8 +58,8 @@ void Neuronet::Propagate(vector<float>* input)
 
             output = m_hiddenlayers[i].GetOutput();
             //for all hidden layers, output of last hidden layer puts as input of outputlayer
-            if (i+1<m_hiddenlayers.size())
-                m_hiddenlayers[i+1].PushInput(&output);
+            if (i + 1 < m_hiddenlayers.size())
+                m_hiddenlayers[i + 1].PushInput(&output);
         }
     }
 
@@ -61,22 +69,65 @@ void Neuronet::Propagate(vector<float>* input)
 }
 
 //Main training function. Run this function in a loop as many times needed per pattern
-float Neuronet::Train(vector<float>* desiredoutput, vector<float>* input, float alpha, float momentum)
+float Neuronet::TrainPattern(vector<float>* desiredoutput, vector<float>* pattern)
 {
+    assert(desiredoutput->size() == outputsize && pattern->size() == inputsize);
+
     //First we begin by propagating the input
-    Propagate(input);
+    Propagate(pattern);
 
     float errorg = m_outputlayer.EstimateError(desiredoutput);
-    float sum = m_outputlayer.Train(desiredoutput, alpha, momentum);
+    float sum = m_outputlayer.Train(desiredoutput);
 
     for (int i = (m_hiddenlayers.size() - 1); i >= 0; i--)
     {
-        sum = m_hiddenlayers[i].Train(sum, alpha, momentum);
+        sum = m_hiddenlayers[i].Train(sum);
     }
 
     //Finally process the input layer
-    m_inputlayer.Train(sum, alpha, momentum);
+    m_inputlayer.Train(sum);
 
     //Return the general error
     return errorg;
+}
+
+
+void Neuronet::SetParams(float gain, float alpha, float momentum)
+{
+
+    assert(gain > 0 && alpha > 0 && alpha < 1 && momentum > 0 && momentum < 1);
+
+    this->gain = gain;
+    this->alpha = alpha;
+    this->momentum = momentum;
+
+    m_inputlayer.SetParams(gain, alpha, momentum);
+    m_outputlayer.SetParams(gain, alpha, momentum);
+
+    for (uint i = 0; i < m_hiddenlayers.size(); i++)
+    {
+        m_hiddenlayers[i].SetParams(gain, alpha, momentum);
+    }
+}
+
+float Neuronet::TrainAll(vector< vector<float> >* desiredoutputs, vector< vector<float> >* patterns, int maxiteration, float stoperror)
+{
+
+    assert(desiredoutputs->size() == patterns->size());
+
+    float error = 0;
+    //Start the neural network training
+    for (int i = 0; i < maxiteration; i++)
+    {
+        for (uint j = 0; j < patterns->size(); j++)
+        {
+            error += TrainPattern(&(desiredoutputs->at(j)), &(patterns->at(j)));
+        }
+        error /= patterns->size();
+
+        if (error < stoperror)
+            return error;
+    }
+
+    return error;
 }

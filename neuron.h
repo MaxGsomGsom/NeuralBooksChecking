@@ -8,7 +8,6 @@ using namespace std;
 class Neuron
 {
 protected:
-    float gain; //Gain value (default = 1)
     float wgain; //Weight gain value
     float output; //Output value
     vector<float> weights; //Neuron input weights or synaptic connections
@@ -17,25 +16,32 @@ protected:
 public:
     Neuron() {} //Constructor
     ~Neuron() {} //Destructor
-    void Create(int inputcount); //Allocates memory and initializates values
+    void Create(int inputcount, float randgain = 1); //Allocates memory and initializates values
     void Calculate(vector<float>* input); //Calculates neuron with formula
     float GetOutput() { return output; }
     int InputCount() { return weights.size(); }
+
+    float gain = 1; //Gain value (default = 1)
+    float alpha = 0.2;
+    float momentum = 0.1;
 };
 
-class InputNeuron: public Neuron {
+class InputNeuron: public Neuron
+{
 public:
-    void Train(vector<float> *layerinput, float errsum, float alpha, float momentum);
+    void Train(vector<float>* layerinput, float errsum);
 };
 
-class HiddenNeuron: public Neuron {
+class HiddenNeuron: public Neuron
+{
 public:
-    float Train(vector<float> *layerinput, float errsum, float alpha, float momentum);
+    float Train(vector<float>* layerinput, float errsum);
 };
 
-class OutputNeuron: public Neuron {
+class OutputNeuron: public Neuron
+{
 public:
-    float Train(float desiredoutput, vector<float>* layerinput, float alpha, float momentum);
+    float Train(float desiredoutput, vector<float>* layerinput);
 };
 
 #endif // NEURON_H

@@ -16,12 +16,12 @@ public:
     Layer() {} //Constructor
     ~Layer() {} //Destructor
 
-    void Create(int inputsize, int neuroncount) //Creates the layer and allocates memory
+    void Create(int inputsize, int neuroncount, float randgain = 1) //Creates the layer and allocates memory
     {
         neurons.resize(neuroncount);
         for (int i = 0; i < neuroncount; i++)
         {
-            neurons[i].Create(inputsize);
+            neurons[i].Create(inputsize, randgain);
         }
 
         layerinput.resize(inputsize);
@@ -40,39 +40,49 @@ public:
     int NeuronsCount() { return neurons.size(); }
     T& Neuron(int i) {return neurons.at(i); }
 
-    void PushInput(vector<float>* input) {
+    void PushInput(vector<float>* input)
+    {
         copy(input->begin(), input->end(), layerinput.begin());
     }
 
-    vector<float> GetOutput() {
+    vector<float> GetOutput()
+    {
         vector<float> output;
-        for (int i=0; i<neurons.size(); i++){
+        for (int i = 0; i < neurons.size(); i++)
+        {
             output.push_back(neurons[i].GetOutput());
         }
         return output;
     }
 
-    //void Neurons(int i) = 0;
-    //int Count() = 0;
+    void SetParams(float gain = 1, float alpha = 0.2, float momentum = 0.1)
+    {
+        for (int i = 0; i < neurons.size(); i++)
+        {
+            neurons[i].gain = gain;
+            neurons[i].alpha = alpha;
+            neurons[i].momentum = momentum;
+        }
+    }
 };
 
 
 class InputLayer: public Layer<InputNeuron>
 {
 public:
-    void Train(float errsum, float alpha, float momentum);
+    void Train(float errsum);
 };
 
 class HiddenLayer: public Layer<HiddenNeuron>
 {
 public:
-    float Train(float errsum, float alpha, float momentum);
+    float Train(float errsum);
 };
 
 class OutputLayer: public Layer<OutputNeuron>
 {
 public:
-    float Train(vector<float>* desiredoutput, float alpha, float momentum);
+    float Train(vector<float>* desiredoutput);
     float EstimateError(vector<float>* desiredoutput);
 };
 

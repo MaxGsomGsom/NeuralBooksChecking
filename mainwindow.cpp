@@ -4,12 +4,15 @@
 #include <neuronet.h>
 
 using namespace std;
-#define PATTERN_COUNT 4
-#define EPOCHS 10000
 
-#define PATTERN_SIZE 2
+#define ITERS 10000
+#define STOP_ERR 0.001
+
+#define INPUT_SIZE 2
 #define NETWORK_INPUTNEURONS 5
-#define NETWORK_OUTPUT 1
+#define NETWORK_OUTPUTNEURONS 1
+
+#define PATTERNS 4
 
 
 MainWindow::MainWindow(QWidget* parent) :
@@ -29,60 +32,45 @@ void MainWindow::on_pushButton_clicked()
     //Create some patterns
     //playing with xor
     //XOR input values
-    vector< vector<float> > pattern;
-    pattern.resize(PATTERN_COUNT);
-    pattern[0].push_back(0);
-    pattern[0].push_back(0);
+    vector< vector<float> > patterns;
+    patterns.resize(PATTERNS);
+    patterns[0].push_back(0);
+    patterns[0].push_back(0);
 
-    pattern[1].push_back(0);
-    pattern[1].push_back(1);
+    patterns[1].push_back(0);
+    patterns[1].push_back(1);
 
-    pattern[2].push_back(1);
-    pattern[2].push_back(0);
+    patterns[2].push_back(1);
+    patterns[2].push_back(0);
 
-    pattern[3].push_back(1);
-    pattern[3].push_back(1);
+    patterns[3].push_back(1);
+    patterns[3].push_back(1);
 
     //XOR desired output values
-    vector< vector<float> > desiredout;
-    desiredout.resize(PATTERN_COUNT);
-    desiredout[0].push_back(0);
-    desiredout[1].push_back(1);
-    desiredout[2].push_back(1);
-    desiredout[3].push_back(0);
-
-    Neuronet net;//Our neural network object
-    float error;
+    vector< vector<float> > desiredouts;
+    desiredouts.resize(PATTERNS);
+    desiredouts[0].push_back(0);
+    desiredouts[1].push_back(1);
+    desiredouts[2].push_back(1);
+    desiredouts[3].push_back(0);
 
     vector<int> hidden;
-    hidden.push_back(5);
-    //We create the network
-    net.Create(PATTERN_SIZE, NETWORK_INPUTNEURONS, NETWORK_OUTPUT, &hidden);
+    hidden.push_back(5); //one hidden layer with 5 neurons
 
-    //Start the neural network training
-    for (int i = 0; i < EPOCHS; i++)
-    {
-        error = 0;
-        for (int j = 0; j < PATTERN_COUNT; j++)
-        {
-            error += net.Train(&(desiredout[j]), &(pattern[j]), 0.2f, 0.1f);
-        }
-        error /= PATTERN_COUNT;
-        //display error
-        cout << "ERROR:" << error << "\r";
-        if (error < 0.001)
-            break;
-    }
+    Neuronet net;//Our neural network object
+    net.Create(INPUT_SIZE, NETWORK_INPUTNEURONS, NETWORK_OUTPUTNEURONS, &hidden);
+    net.SetParams();
+
+    float error = net.TrainAll(&desiredouts, &patterns);
+
+    cout << "ERROR " << error << endl;
 
     //once trained test all patterns
-
-    for (int i = 0; i < PATTERN_COUNT; i++)
+    for (int i = 0; i < PATTERNS; i++)
     {
-
-        net.Propagate(&pattern[i]);
-
+        net.Propagate(&patterns[i]);
         //display result
-        cout << "TESTED PATTERN " << i << " INPUT: " << pattern[i][0] << "," << pattern[i][1] << " DESIRED OUTPUT: " << desiredout[i][0] << " NET RESULT: " << net.GetOutput()[0] << endl;
+        cout << "TESTED PATTERN " << i << " | INPUT: " << patterns[i][0] << "," << patterns[i][1] << " | DESIRED OUTPUT: " << desiredouts[i][0] << " | RESULT: " << net.GetOutput()[0] << endl;
     }
 
 }

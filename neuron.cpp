@@ -4,7 +4,7 @@
 
 
 //Initializates neuron weights
-void Neuron::Create(int inputcount)
+void Neuron::Create(int inputcount, float randgain)
 {
     weights.resize(inputcount);
     deltavalues.resize(inputcount);
@@ -18,8 +18,8 @@ void Neuron::Create(int inputcount)
         deltavalues[i] = 0;
     }
 
-    gain = 1;
     wgain = rand() / float(RAND_MAX) * 2 - 1;
+    wgain *= randgain;
 
 }
 
@@ -36,33 +36,35 @@ void Neuron::Calculate(vector<float>* input)
 }
 
 
-float OutputNeuron::Train(float desiredoutput, vector<float>* layerinput, float alpha, float momentum){
+float OutputNeuron::Train(float desiredoutput, vector<float>* layerinput)
+{
 
-        float errsum = 0;
+    float errsum = 0;
 
-        //Calculate the error value for the output layer
-        float errorc = (desiredoutput - output) * output * (1 - output);
+    //Calculate the error value for the output layer
+    float errorc = (desiredoutput - output) * output * (1 - output);
 
-        //Now we proceed to update the weights of the neuron
-        for (uint j = 0; j < layerinput->size(); j++)
-        {
-            //Update the delta value
-            float udelta = alpha * errorc * layerinput->at(j) + deltavalues[j] * momentum;
-            //Update the weight values
-            weights[j] += udelta;
-            deltavalues[j] = udelta;
+    //Now we proceed to update the weights of the neuron
+    for (uint j = 0; j < layerinput->size(); j++)
+    {
+        //Update the delta value
+        float udelta = alpha * errorc * layerinput->at(j) + deltavalues[j] * momentum;
+        //Update the weight values
+        weights[j] += udelta;
+        deltavalues[j] = udelta;
 
-            //We need this to propagate to the next layer
-            errsum += weights[j] * errorc;
-        }
+        //We need this to propagate to the next layer
+        errsum += weights[j] * errorc;
+    }
 
-        //Calculate the weight gain
-        wgain += alpha * errorc * gain;
+    //Calculate the weight gain
+    wgain += alpha * errorc * gain;
 
-        return errsum;
+    return errsum;
 }
 
-float HiddenNeuron::Train(vector<float> *layerinput, float errsum, float alpha, float momentum){
+float HiddenNeuron::Train(vector<float>* layerinput, float errsum)
+{
 
     float cerrsum = 0; //Neded for next layer
 
@@ -83,7 +85,8 @@ float HiddenNeuron::Train(vector<float> *layerinput, float errsum, float alpha, 
     return cerrsum;
 }
 
-void InputNeuron::Train(vector<float> *layerinput, float errsum, float alpha, float momentum) {
+void InputNeuron::Train(vector<float>* layerinput, float errsum)
+{
 
     float errorc = output * (1 - output) * errsum;
 
