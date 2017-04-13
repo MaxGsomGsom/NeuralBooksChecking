@@ -25,8 +25,13 @@ public:
     float GetGain() { return gain; } //Get neurons gain
     float GetAlpha() { return alpha; } //Get alpha
     float GetMomentum() { return momentum; } //Get momentum
+    int HiddenLayersCount() { return m_hiddenlayers.size(); } //Get hidden layers count
 
-    //Returns the output layer. This is useful to get the output values of the network
+    T_in& InputLayer() {return m_inputlayer; } //iterrator
+    T_out& OutputLayer() {return m_outputlayer; } //iterrator
+    T_hid& HiddenLayer(int i) {return m_hiddenlayers.at(i); } //iterrator
+
+    //This is useful to get the output values of the network
     vector<float> GetOutput()
     {
         return m_outputlayer.GetOutput();
