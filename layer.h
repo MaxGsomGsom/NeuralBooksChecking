@@ -4,6 +4,7 @@
 #include <vector>
 #include <neuron.h>
 #include <cstdlib>
+#include <cmath>
 
 template<class T = Neuron>
 class Layer
@@ -15,8 +16,12 @@ protected:
 public:
     Layer() {} //Constructor
     ~Layer() {} //Destructor
+    int InputCount() { return layerinput.size(); } //get layerinput size
+    int NeuronsCount() { return neurons.size(); } //get neurons size
+    T& Neuron(int i) {return neurons.at(i); } //iterrator
 
-    void Create(int inputsize, int neuroncount, float randgain = 1) //Creates the layer and allocates memory
+    //Creates the layer and allocates memory
+    void Create(int inputsize, int neuroncount, float randgain = 1)
     {
         neurons.resize(neuroncount);
         for (int i = 0; i < neuroncount; i++)
@@ -27,7 +32,8 @@ public:
         layerinput.resize(inputsize);
     }
 
-    void Calculate() //Calculates all neurons performing the network formula
+    //Calculates all neurons performing the network formula
+    void Calculate()
     {
         //Apply the formula for each neuron
         for (uint i = 0; i < neurons.size(); i++)
@@ -36,10 +42,7 @@ public:
         }
     }
 
-    int InputCount() { return layerinput.size(); }
-    int NeuronsCount() { return neurons.size(); }
-    T& Neuron(int i) {return neurons.at(i); }
-
+    //Fill layerinput with new elements
     void PushInput(vector<float>* input)
     {
         copy(input->begin(), input->end(), layerinput.begin());
@@ -55,6 +58,7 @@ public:
         return output;
     }
 
+    //Set new neurons parameters
     void SetParams(float gain = 1, float alpha = 0.2, float momentum = 0.1)
     {
         for (int i = 0; i < neurons.size(); i++)
@@ -67,23 +71,70 @@ public:
 };
 
 
-class InputLayer: public Layer<InputNeuron>
+/* ===== InputNeuron ===== */
+
+template<class T = InputNeuron>
+class InputLayer: public Layer<T>
 {
 public:
-    void Train(float errsum);
+    void Train(float errsum)
+    {
+        for (uint i = 0; i < this->neurons.size(); i++)
+        {
+            this->neurons[i].Train(&(this->layerinput), errsum);
+        }
+    }
 };
 
-class HiddenLayer: public Layer<HiddenNeuron>
+
+/* ===== HiddenLayer ===== */
+
+template<class T = HiddenNeuron>
+class HiddenLayer: public Layer<T>
 {
 public:
-    float Train(float errsum);
+    float Train(float errsum)
+    {
+
+        float csum = 0;
+        for (uint j = 0; j < this->neurons.size(); j++)
+        {
+            //The general error is the sum of delta values. Where delta is the squared difference
+            //of the desired value with the output value
+            csum += this->neurons[j].Train(&(this->layerinput), errsum);
+        }
+        return csum;
+    }
 };
 
-class OutputLayer: public Layer<OutputNeuron>
+
+/* ===== OutputLayer ===== */
+
+template<class T = OutputNeuron>
+class OutputLayer: public Layer<T>
 {
 public:
-    float Train(vector<float>* desiredoutput);
-    float EstimateError(vector<float>* desiredoutput);
+    float Train(vector<float>* desiredoutput)
+    {
+        float errsum = 0;
+        for (uint i = 0; i < this->neurons.size(); i++)
+        {
+            errsum += this->neurons[i].Train(&(this->layerinput), desiredoutput->at(i));
+        }
+
+        return errsum;
+    }
+
+    float EstimateError(vector<float>* desiredoutput)
+    {
+        float errorg = 0;
+        for (uint i = 0; i < this->neurons.size(); i++)
+        {
+            errorg += pow((desiredoutput->at(i) - this->neurons[i].GetOutput()), 2.f);
+        }
+
+        return errorg / 2;
+    }
 };
 
 #endif // LAYER_H

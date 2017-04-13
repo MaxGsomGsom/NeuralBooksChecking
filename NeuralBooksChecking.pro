@@ -13,10 +13,7 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp \
-    layer.cpp \
-    neuron.cpp \
-    neuronet.cpp
+        mainwindow.cpp
 
 HEADERS  += mainwindow.h \
     layer.h \

@@ -57,7 +57,7 @@ void MainWindow::on_pushButton_clicked()
     vector<int> hidden;
     hidden.push_back(5); //one hidden layer with 5 neurons
 
-    Neuronet net;//Our neural network object
+    Neuronet<> net;//Our neural network object
     net.Create(INPUT_SIZE, NETWORK_INPUTNEURONS, NETWORK_OUTPUTNEURONS, &hidden);
     net.SetParams();
 
