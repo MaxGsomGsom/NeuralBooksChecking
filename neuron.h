@@ -4,8 +4,12 @@
 #include <vector>
 #include <cstdlib>
 #include <cmath>
+#include <exceptions.h>
 
 using namespace std;
+
+namespace Neuronets
+{
 
 class Neuron
 {
@@ -27,6 +31,8 @@ public:
     //Allocates memory and initializates values
     void Create(int inputcount, float randgain = 1)
     {
+        WRONG_ARGS_EX(inputcount > 0 && randgain > 0)
+
         weights.resize(inputcount);
         deltavalues.resize(inputcount);
 
@@ -46,6 +52,8 @@ public:
     //Calculates neuron with formula
     void Calculate(vector<float>* input)
     {
+        VECTOR_SIZE_EX(input && input->size() == weights.size())
+
         float sum = 0; //Store the sum of all values here
         for (uint j = 0; j < input->size(); j++)
         {
@@ -64,6 +72,8 @@ class InputNeuron: public Neuron
 public:
     void Train(vector<float>* layerinput, float errsum)
     {
+        VECTOR_SIZE_EX(layerinput && layerinput->size() == weights.size())
+
         float errorc = output * (1 - output) * errsum;
 
         for (uint j = 0; j < layerinput->size(); j++)
@@ -85,6 +95,7 @@ class HiddenNeuron: public Neuron
 public:
     float Train(vector<float>* layerinput, float errsum)
     {
+        VECTOR_SIZE_EX(layerinput && layerinput->size() == weights.size())
 
         float cerrsum = 0; //Neded for next layer
 
@@ -113,6 +124,8 @@ class OutputNeuron: public Neuron
 public:
     float Train(vector<float>* layerinput, float desiredoutput)
     {
+        VECTOR_SIZE_EX(layerinput && layerinput->size() == weights.size())
+
         float errsum = 0;
 
         //Calculate the error value for the output layer
@@ -137,5 +150,7 @@ public:
         return errsum;
     }
 };
+
+}
 
 #endif // NEURON_H

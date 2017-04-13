@@ -4,7 +4,10 @@
 #include <layer.h>
 #include <vector>
 #include <cstdlib>
-#include <cassert>
+#include <exceptions.h>
+
+namespace Neuronets
+{
 
 template<class T_in = InputLayer<>, class T_out = OutputLayer<>, class T_hid = HiddenLayer<> >
 class Neuronet
@@ -29,7 +32,13 @@ public:
 
     T_in& InputLayer() {return m_inputlayer; } //iterrator
     T_out& OutputLayer() {return m_outputlayer; } //iterrator
-    T_hid& HiddenLayer(int i) {return m_hiddenlayers.at(i); } //iterrator
+
+    //iterrator
+    T_hid& HiddenLayer(int i)
+    {
+        OUT_OF_RANGE_EX(i < m_hiddenlayers.size() && i >= 0)
+        return m_hiddenlayers.at(i);
+    }
 
     //This is useful to get the output values of the network
     vector<float> GetOutput()
@@ -40,7 +49,7 @@ public:
     //Creates the network structure on memory
     void Create(int inputcount, int inputneurons, int outputcount, vector<int>* hiddenlayers, float randgain = 1)
     {
-        assert(inputcount > 0 && inputneurons > 0 && outputcount > 0 && randgain > 0 && hiddenlayers);
+        WRONG_ARGS_EX(inputcount > 0 && inputneurons > 0 && outputcount > 0 && randgain > 0 && hiddenlayers)
 
         this->inputsize = inputcount;
         this->outputsize = outputcount;
@@ -73,7 +82,7 @@ public:
     //Calculates the network values given an input pattern
     void Propagate(vector<float>* input)
     {
-        assert(input->size() == inputsize);
+        VECTOR_SIZE_EX(input && input->size() == inputsize)
 
         //The propagation function should start from the input layer
         //first copy the input vector to the input layer
@@ -108,7 +117,7 @@ public:
     //and applying the backpropagation algorithm
     float TrainPattern(vector<float>* desiredoutput, vector<float>* pattern)
     {
-        assert(desiredoutput->size() == outputsize && pattern->size() == inputsize);
+        VECTOR_SIZE_EX(desiredoutput && desiredoutput->size() == outputsize && pattern && pattern->size() == inputsize)
 
         //First we begin by propagating the input
         Propagate(pattern);
@@ -131,8 +140,8 @@ public:
     //Train all given patterns
     float TrainAll(vector< vector<float> >* desiredoutputs, vector< vector<float> >* patterns, int maxiteration = 10000, float stoperror = 0.001)
     {
-
-        assert(desiredoutputs->size() == patterns->size());
+        WRONG_ARGS_EX(maxiteration > 0 && stoperror >= 0)
+        VECTOR_SIZE_EX(desiredoutputs && desiredoutputs->size() == patterns->size())
 
         float error = 0;
         //Start the neural network training
@@ -155,7 +164,7 @@ public:
     void SetParams(float gain = 1, float alpha = 0.2, float momentum = 0.1)
     {
 
-        assert(gain > 0 && alpha > 0 && alpha < 1 && momentum > 0 && momentum < 1);
+        WRONG_ARGS_EX(gain > 0 && alpha > 0 && alpha < 1 && momentum > 0 && momentum < 1)
 
         this->gain = gain;
         this->alpha = alpha;
@@ -170,5 +179,7 @@ public:
         }
     }
 };
+
+}
 
 #endif // NEURONET_H

@@ -18,7 +18,8 @@ SOURCES += main.cpp\
 HEADERS  += mainwindow.h \
     layer.h \
     neuron.h \
-    neuronet.h
+    neuronet.h \
+    exceptions.h
 
 FORMS    += mainwindow.ui
 

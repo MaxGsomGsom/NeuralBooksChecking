@@ -4,6 +4,7 @@
 #include <neuronet.h>
 
 using namespace std;
+using namespace Neuronets;
 
 #define ITERS 10000
 #define STOP_ERR 0.001

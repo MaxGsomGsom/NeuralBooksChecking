@@ -6,6 +6,9 @@
 #include <cstdlib>
 #include <cmath>
 
+namespace Neuronets
+{
+
 template<class T = Neuron>
 class Layer
 {
@@ -18,11 +21,17 @@ public:
     ~Layer() {} //Destructor
     int InputCount() { return layerinput.size(); } //get layerinput size
     int NeuronsCount() { return neurons.size(); } //get neurons size
-    T& Neuron(int i) {return neurons.at(i); } //iterrator
+    T& Neuron(int i) //iterrator
+    {
+        OUT_OF_RANGE_EX(i >= 0 && i < neurons.size())
+        return neurons.at(i);
+    }
 
     //Creates the layer and allocates memory
     void Create(int inputsize, int neuroncount, float randgain = 1)
     {
+        WRONG_ARGS_EX(inputsize > 0 && neuroncount > 0 && randgain > 0)
+
         neurons.resize(neuroncount);
         for (int i = 0; i < neuroncount; i++)
         {
@@ -45,6 +54,8 @@ public:
     //Fill layerinput with new elements
     void PushInput(vector<float>* input)
     {
+        VECTOR_SIZE_EX(input && input->size() == layerinput.size())
+
         copy(input->begin(), input->end(), layerinput.begin());
     }
 
@@ -61,6 +72,8 @@ public:
     //Set new neurons parameters
     void SetParams(float gain = 1, float alpha = 0.2, float momentum = 0.1)
     {
+        WRONG_ARGS_EX(gain > 0 && alpha > 0 && alpha < 1 && momentum > 0 && momentum < 1)
+
         for (int i = 0; i < neurons.size(); i++)
         {
             neurons[i].gain = gain;
@@ -95,7 +108,6 @@ class HiddenLayer: public Layer<T>
 public:
     float Train(float errsum)
     {
-
         float csum = 0;
         for (uint j = 0; j < this->neurons.size(); j++)
         {
@@ -116,6 +128,8 @@ class OutputLayer: public Layer<T>
 public:
     float Train(vector<float>* desiredoutput)
     {
+        VECTOR_SIZE_EX(desiredoutput && desiredoutput->size() == this->neurons.size())
+
         float errsum = 0;
         for (uint i = 0; i < this->neurons.size(); i++)
         {
@@ -127,6 +141,8 @@ public:
 
     float EstimateError(vector<float>* desiredoutput)
     {
+        VECTOR_SIZE_EX(desiredoutput && desiredoutput->size() == this->neurons.size())
+
         float errorg = 0;
         for (uint i = 0; i < this->neurons.size(); i++)
         {
@@ -136,5 +152,7 @@ public:
         return errorg / 2;
     }
 };
+
+}
 
 #endif // LAYER_H
