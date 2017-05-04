@@ -13,13 +13,16 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp
+        mainwindow.cpp \
+    books_checker.cpp
 
 HEADERS  += mainwindow.h \
     layer.h \
     neuron.h \
     neuronet.h \
-    exceptions.h
+    exceptions.h \
+    books_checker.h \
+    logger.h
 
 FORMS    += mainwindow.ui
 

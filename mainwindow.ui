@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Prints verifying toolbox</string>
+   <string>Books verifying toolbox</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <widget class="QGroupBox" name="groupBoxOutput">
@@ -26,7 +26,7 @@
     <property name="title">
      <string>Output</string>
     </property>
-    <widget class="QTextBrowser" name="textBrowserOutput">
+    <widget class="QTextEdit" name="textEditOutput">
      <property name="geometry">
       <rect>
        <x>0</x>
@@ -34,6 +34,21 @@
        <width>581</width>
        <height>131</height>
       </rect>
+     </property>
+     <property name="acceptDrops">
+      <bool>false</bool>
+     </property>
+     <property name="verticalScrollBarPolicy">
+      <enum>Qt::ScrollBarAlwaysOn</enum>
+     </property>
+     <property name="horizontalScrollBarPolicy">
+      <enum>Qt::ScrollBarAlwaysOff</enum>
+     </property>
+     <property name="undoRedoEnabled">
+      <bool>false</bool>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
      </property>
     </widget>
    </widget>
@@ -47,11 +62,11 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>2</number>
     </property>
     <widget class="QWidget" name="tabMain">
      <attribute name="title">
-      <string>Testing of books</string>
+      <string>Verifying of prints</string>
      </attribute>
      <widget class="QGroupBox" name="groupBox">
       <property name="geometry">
@@ -190,7 +205,7 @@
         </rect>
        </property>
        <property name="text">
-        <string>Test both</string>
+        <string>Verify both</string>
        </property>
       </widget>
       <widget class="QPushButton" name="pushButtonTestLoadPage">
@@ -211,25 +226,25 @@
         <rect>
          <x>10</x>
          <y>190</y>
-         <width>87</width>
+         <width>101</width>
          <height>27</height>
         </rect>
        </property>
        <property name="text">
-        <string>Test params</string>
+        <string>Verify params</string>
        </property>
       </widget>
       <widget class="QPushButton" name="pushButtonTestPage">
        <property name="geometry">
         <rect>
-         <x>100</x>
+         <x>120</x>
          <y>190</y>
-         <width>87</width>
+         <width>101</width>
          <height>27</height>
         </rect>
        </property>
        <property name="text">
-        <string>Test page</string>
+        <string>Verify page</string>
        </property>
       </widget>
       <widget class="QLabel" name="labelPageTest">
@@ -281,7 +296,7 @@
         </rect>
        </property>
        <property name="text">
-        <string>Test books</string>
+        <string>Verify books</string>
        </property>
       </widget>
       <widget class="QPushButton" name="pushButtonTestClear">
@@ -378,7 +393,7 @@
        <bool>false</bool>
       </property>
       <property name="title">
-       <string>Learning of pages</string>
+       <string>Learning of params</string>
       </property>
       <property name="flat">
        <bool>false</bool>
@@ -621,9 +636,21 @@
         <rect>
          <x>23</x>
          <y>70</y>
-         <width>161</width>
+         <width>171</width>
          <height>101</height>
         </rect>
+       </property>
+       <property name="verticalScrollBarPolicy">
+        <enum>Qt::ScrollBarAlwaysOn</enum>
+       </property>
+       <property name="horizontalScrollBarPolicy">
+        <enum>Qt::ScrollBarAlwaysOff</enum>
+       </property>
+       <property name="lineWrapMode">
+        <enum>QTextEdit::NoWrap</enum>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
        </property>
       </widget>
       <widget class="QPushButton" name="pushButtonAddBad">
@@ -657,9 +684,21 @@
         <rect>
          <x>230</x>
          <y>70</y>
-         <width>161</width>
+         <width>171</width>
          <height>101</height>
         </rect>
+       </property>
+       <property name="verticalScrollBarPolicy">
+        <enum>Qt::ScrollBarAlwaysOn</enum>
+       </property>
+       <property name="horizontalScrollBarPolicy">
+        <enum>Qt::ScrollBarAlwaysOff</enum>
+       </property>
+       <property name="lineWrapMode">
+        <enum>QTextEdit::NoWrap</enum>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
        </property>
       </widget>
       <widget class="QPushButton" name="pushButtonLearnPages">
