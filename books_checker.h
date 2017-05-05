@@ -2,6 +2,7 @@
 #define BOOKS_CHECKER_H
 
 #include <neuronet.h>
+#include <QString>
 
 using namespace Neuronets;
 
@@ -9,14 +10,20 @@ class BooksChecker
 {
 public:
     BooksChecker();
-    void LearnPages();
+    float LearnPages(); //returns error
     void ClearGoodPages();
-    void AddGoodPage(string file);
+    void AddGoodPage(QString file);
+    void ClearBadPages();
+    void AddBadPage(QString file);
+
+    bool PagesLearned = false;
+    bool ParamsLearned = false;
+    float LastPagesError() { return pagesChecker.LastError(); }
 
 private:
     Neuronet<> pagesChecker;
-    vector<string> goodPages;
-    vector<string> badPages;
+    vector<QString> goodPages;
+    vector<QString> badPages;
 };
 
 #endif // BOOKS_CHECKER_H

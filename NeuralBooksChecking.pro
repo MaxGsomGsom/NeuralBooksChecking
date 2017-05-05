@@ -22,7 +22,8 @@ HEADERS  += mainwindow.h \
     neuronet.h \
     exceptions.h \
     books_checker.h \
-    logger.h
+    logger.h \
+    train_thread.h
 
 FORMS    += mainwindow.ui
 

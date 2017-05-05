@@ -4,6 +4,8 @@
 #include <QMainWindow>
 #include <books_checker.h>
 #include <logger.h>
+#include <QLabel>
+#include <train_thread.h>
 
 namespace Ui
 {
@@ -20,8 +22,13 @@ public:
 
 private:
     Ui::MainWindow* ui;
-    BooksChecker checker;
+    BooksChecker* checker;
     Logger *logger;
+    QLabel* paramsStatus;
+    QLabel* pagesStatus;
+    void SetStatus();
+    QTimer* t;
+    TrainThread* trainThread;
 
 
 protected:
@@ -30,6 +37,10 @@ private slots:
     void on_pushButtonLearnPages_clicked();
     void on_pushButtonAddGood_clicked();
     void on_pushButtonClearGood_clicked();
+    void on_pushButtonAddBad_clicked();
+    void on_pushButtonClearBad_clicked();
+    void trainPagesStatusbar();
+    void trainPagesFinished();
 };
 
 #endif // MAINWINDOW_H

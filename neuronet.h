@@ -21,6 +21,7 @@ private:
     float momentum = 0.1; //Train parameter
     float inputsize; //Network input size
     float outputsize; //Network outinput size
+    float lastError;
 
 public:
     Neuronet() {} //Constructor
@@ -29,6 +30,7 @@ public:
     float GetAlpha() { return alpha; } //Get alpha
     float GetMomentum() { return momentum; } //Get momentum
     int HiddenLayersCount() { return m_hiddenlayers.size(); } //Get hidden layers count
+    float LastError() { return lastError; }
 
     T_in& InputLayer() {return m_inputlayer; } //iterrator
     T_out& OutputLayer() {return m_outputlayer; } //iterrator
@@ -152,6 +154,8 @@ public:
                 error += TrainPattern(&(desiredoutputs->at(j)), &(patterns->at(j)));
             }
             error /= patterns->size();
+
+            lastError = error;
 
             if (error < stoperror)
                 return error;
