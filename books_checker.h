@@ -15,15 +15,24 @@ public:
     void AddGoodPage(QString file);
     void ClearBadPages();
     void AddBadPage(QString file);
-
-    bool PagesLearned = false;
-    bool ParamsLearned = false;
+    bool VerifyPage(QString file); //returns result
+    bool IsPagesLearned() { return pagesChecker.IsTrained(); }
     float LastPagesError() { return pagesChecker.LastError(); }
+    bool IsParamsLearned() { return paramsChecker.IsTrained(); }
+    float LastParamsError() { return paramsChecker.LastError(); }
+    void ClearParamsToLearn();
+    void AddParamsToLearn(QString params); //weight; height; width; thickness; pagesNum
+    float LearnParams(); //returns error
+    void ResetParamsNet();
+    void ResetPagesNet();
+    bool VerifyParams(QString params); //weight; height; width; thickness; pagesNum
 
 private:
     Neuronet<> pagesChecker;
     vector<QString> goodPages;
     vector<QString> badPages;
+    Neuronet<> paramsChecker;
+    vector<vector<float>> paramsToLearn;
 };
 
 #endif // BOOKS_CHECKER_H

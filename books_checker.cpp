@@ -1,27 +1,47 @@
 #include "books_checker.h"
 #include <iostream>
 #include <QImage>
+#include <QStringList>
 
 using namespace Neuronets;
 using namespace std;
 
 #define ITERS 10000
-#define STOP_ERR 0.1
 
-#define NETWORK_INPUTNEURONS 100
-#define NETWORK_OUTPUTNEURONS 1
-#define NETWORK_HIDDENEURONS 10
-
+#define INPUTNEURONS_PAGES 100
+#define OUTPUTNEURONS_PAGES 1
+#define HIDDENEURONS_PAGES 10
 #define IMG_HEIGHT 210
 #define IMG_WIDTH 148
+#define BORDER_PAGES 0.5
+#define STOP_ERR_PAGES 0.1
+
+#define INPUT_PARAMS 5
+#define INPUTNEURONS_PARAMS 10
+#define OUTPUTNEURONS_PARAMS 1
+#define HIDDENEURONS_PARAMS 5
+#define BORDER_PARAMS 0.9
+#define STOP_ERR_PARAMS 0.001
+#define DIFF 200
 
 BooksChecker::BooksChecker()
 {
-    vector<int> hidden;
-    hidden.push_back(NETWORK_HIDDENEURONS); //one hidden layer
+    ResetPagesNet();
+    ResetParamsNet();
+}
 
-    pagesChecker.Create(IMG_HEIGHT * IMG_WIDTH, NETWORK_INPUTNEURONS, NETWORK_OUTPUTNEURONS, &hidden);
+void BooksChecker::ResetPagesNet(){
+    vector<int> hidden;
+    hidden.push_back(HIDDENEURONS_PAGES); //one hidden layer
+    pagesChecker.Create(IMG_HEIGHT * IMG_WIDTH, INPUTNEURONS_PAGES, OUTPUTNEURONS_PAGES, &hidden);
     pagesChecker.SetParams();
+}
+
+void BooksChecker::ResetParamsNet(){
+    vector<int> hidden2;
+    hidden2.push_back(HIDDENEURONS_PARAMS); //one hidden layer
+    paramsChecker.Create(INPUT_PARAMS, INPUTNEURONS_PARAMS, OUTPUTNEURONS_PARAMS, &hidden2);
+    paramsChecker.SetParams();
 }
 
 float BooksChecker::LearnPages()
@@ -67,7 +87,7 @@ float BooksChecker::LearnPages()
 
     }
 
-    float error = pagesChecker.TrainAll(&outputs, &patterns, ITERS, STOP_ERR);
+    float error = pagesChecker.TrainAll(&outputs, &patterns, ITERS, STOP_ERR_PAGES);
     return error;
 }
 
@@ -90,3 +110,92 @@ void BooksChecker::AddBadPage(QString file)
 {
     badPages.push_back(file);
 }
+
+
+//====================================
+
+
+void BooksChecker::ClearParamsToLearn(){
+    paramsToLearn.clear();
+}
+
+void BooksChecker::AddParamsToLearn(QString params) {
+
+    vector<float> dataset;
+    QStringList list = params.split(";");
+    foreach (QString param, list) {
+        dataset.push_back(param.toFloat());
+    }
+    paramsToLearn.push_back(dataset);
+}
+
+float BooksChecker::LearnParams()
+{
+    vector< vector<float> > outputs;
+    vector< vector<float> > patterns;
+
+    vector<float> output1;
+    output1.push_back(1.f);
+
+    vector<float> output0;
+    output0.push_back(0.f);
+
+    for (uint i=0; i<paramsToLearn.size(); i++) {
+
+        //add good pattern
+        outputs.push_back(output1);
+        patterns.push_back(paramsToLearn[i]);
+
+        //add two bad patterns
+        outputs.push_back(output0);
+        outputs.push_back(output0);
+        vector<float> max;
+        vector<float> min;
+
+        for (int k=0; k<INPUT_PARAMS; k++) {
+            max.push_back(paramsToLearn[i][k]+DIFF);
+            min.push_back(paramsToLearn[i][k]-DIFF);
+        }
+        patterns.push_back(max);
+        patterns.push_back(min);
+    }
+
+
+    float error = paramsChecker.TrainAll(&outputs, &patterns, ITERS, STOP_ERR_PARAMS);
+    return error;
+}
+
+//======================================
+
+
+bool BooksChecker::VerifyPage(QString file)
+{
+    QImage img(file);
+    img = img.scaled(IMG_WIDTH, IMG_HEIGHT);
+    vector<float> input;
+    for (int y = 0; y < img.height(); y++)
+    {
+        for (int x = 0; x < img.width(); x++)
+        {
+            input.push_back(img.pixel(x, y) & 0x00FFFFFF);
+        }
+    }
+    pagesChecker.Propagate(&input);
+    if (pagesChecker.GetOutput()[0] > BORDER_PAGES) return true;
+    else return false;
+}
+
+bool BooksChecker::VerifyParams(QString params) {
+
+    vector<float> input;
+    QStringList list = params.split(";");
+    foreach (QString param, list) {
+        input.push_back(param.toFloat());
+    }
+
+    paramsChecker.Propagate(&input);
+    if (paramsChecker.GetOutput()[0] > BORDER_PARAMS) return true;
+    else return false;
+}
+
+

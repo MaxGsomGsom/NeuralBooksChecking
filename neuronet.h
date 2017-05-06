@@ -21,7 +21,32 @@ private:
     float momentum = 0.1; //Train parameter
     float inputsize; //Network input size
     float outputsize; //Network outinput size
-    float lastError;
+    float lastError = 0;
+    bool isTrained = false;
+
+    //Updates the weight values of the network given a desired output
+    //and applying the backpropagation algorithm
+    float TrainPattern(vector<float>* desiredoutput, vector<float>* pattern)
+    {
+        VECTOR_SIZE_EX(desiredoutput && desiredoutput->size() == outputsize && pattern && pattern->size() == inputsize)
+
+        //First we begin by propagating the input
+        Propagate(pattern);
+
+        float errorg = m_outputlayer.EstimateError(desiredoutput);
+        float sum = m_outputlayer.Train(desiredoutput);
+
+        for (int i = (m_hiddenlayers.size() - 1); i >= 0; i--)
+        {
+            sum = m_hiddenlayers[i].Train(sum);
+        }
+
+        //Finally process the input layer
+        m_inputlayer.Train(sum);
+
+        //Return the general error
+        return errorg;
+    }
 
 public:
     Neuronet() {} //Constructor
@@ -31,6 +56,7 @@ public:
     float GetMomentum() { return momentum; } //Get momentum
     int HiddenLayersCount() { return m_hiddenlayers.size(); } //Get hidden layers count
     float LastError() { return lastError; }
+    bool IsTrained() { return isTrained;}
 
     T_in& InputLayer() {return m_inputlayer; } //iterrator
     T_out& OutputLayer() {return m_outputlayer; } //iterrator
@@ -52,6 +78,9 @@ public:
     void Create(int inputcount, int inputneurons, int outputcount, vector<int>* hiddenlayers, float randgain = 1)
     {
         WRONG_ARGS_EX(inputcount > 0 && inputneurons > 0 && outputcount > 0 && randgain > 0 && hiddenlayers)
+
+        lastError = 0;
+        isTrained = false;
 
         this->inputsize = inputcount;
         this->outputsize = outputcount;
@@ -113,31 +142,7 @@ public:
         m_outputlayer.PushInput(&output);
         //Calculating the final stage - the output layer
         m_outputlayer.Calculate();
-    }
-
-    //Updates the weight values of the network given a desired output
-    //and applying the backpropagation algorithm
-    float TrainPattern(vector<float>* desiredoutput, vector<float>* pattern)
-    {
-        VECTOR_SIZE_EX(desiredoutput && desiredoutput->size() == outputsize && pattern && pattern->size() == inputsize)
-
-        //First we begin by propagating the input
-        Propagate(pattern);
-
-        float errorg = m_outputlayer.EstimateError(desiredoutput);
-        float sum = m_outputlayer.Train(desiredoutput);
-
-        for (int i = (m_hiddenlayers.size() - 1); i >= 0; i--)
-        {
-            sum = m_hiddenlayers[i].Train(sum);
-        }
-
-        //Finally process the input layer
-        m_inputlayer.Train(sum);
-
-        //Return the general error
-        return errorg;
-    }
+    } 
 
     //Train all given patterns
     float TrainAll(vector< vector<float> >* desiredoutputs, vector< vector<float> >* patterns, int maxiteration = 10000, float stoperror = 0.001)
@@ -157,8 +162,10 @@ public:
 
             lastError = error;
 
-            if (error < stoperror)
+            if (error < stoperror) {
+                isTrained = true;
                 return error;
+            }
         }
 
         return error;

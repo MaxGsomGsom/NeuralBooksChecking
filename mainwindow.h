@@ -26,13 +26,13 @@ private:
     Logger *logger;
     QLabel* paramsStatus;
     QLabel* pagesStatus;
-    void SetStatus();
+    void SetNetsStatus();
     QTimer* t;
-    TrainThread* trainThread;
+    TrainThread* trainThread = NULL;
+    QString pageToVerify;
+    string GetLearningParamsFromGUI();
+    string GetTestParamsFromGUI();
 
-
-protected:
-    void showEvent(QShowEvent *ev);
 private slots:
     void on_pushButtonLearnPages_clicked();
     void on_pushButtonAddGood_clicked();
@@ -41,6 +41,17 @@ private slots:
     void on_pushButtonClearBad_clicked();
     void trainPagesStatusbar();
     void trainPagesFinished();
+    void on_pushButtonTestPage_clicked();
+    void on_pushButtonTestLoadPage_clicked();
+    void on_pushButtonClearParams_clicked();
+    void on_pushButton_clicked();
+    void on_pushButtonLearnParams_clicked();
+    void trainParamsFinished();
+    void trainParamsStatusbar();
+    void on_pushButtonResetPages_clicked();
+    void on_pushButtonResetParams_clicked();
+    void on_pushButtonTestParams_clicked();
+    void on_pushButtonTestBoth_clicked();
 };
 
 #endif // MAINWINDOW_H

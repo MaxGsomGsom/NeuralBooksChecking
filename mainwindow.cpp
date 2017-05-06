@@ -6,6 +6,10 @@
 #include <QLabel>
 #include <QTimer>
 #include <train_thread.h>
+#include <iomanip>
+#include <sstream>
+
+#define DELAY 500
 
 using namespace std;
 
@@ -13,8 +17,6 @@ using namespace std;
 1. Реализовать все методы, представленные в интерфейсе
 2. При запуске программы должны загружаться последние настройки нейросетей
 3. Реализовать отдельный класс для хранения параметров с сериализацией в файл
-4. В окне output выводятся все действия с системой: загрузка и сохранение параметров, обучение, проверка книг
-5. В статусбаре отображается состояние двух нейросетей (обучена - не обучена - обучается) и последняя операция, например: загружено 100 строк или сеть обучена с ошибкой 0.01 и т.д.
 6. Также отчеты о пакетной проверке книг должны сохраняться в отдельных лог-файлах
 */
 
@@ -31,12 +33,12 @@ MainWindow::MainWindow(QWidget* parent) :
     pagesStatus = new QLabel(this);
     ui->statusBar->addPermanentWidget(paramsStatus);
     ui->statusBar->addPermanentWidget(pagesStatus);
-    SetStatus();
 
     t = new QTimer(this);
-    t->setInterval(1000);
+    t->setInterval(DELAY);
 
     checker = new BooksChecker();
+    SetNetsStatus();
 
 }
 
@@ -46,36 +48,88 @@ MainWindow::~MainWindow()
     delete paramsStatus;
     delete pagesStatus;
     delete t;
-    delete trainThread;
+    if (trainThread)
+        delete trainThread;
     delete checker;
 }
 
-void MainWindow::SetStatus()
+void MainWindow::SetNetsStatus()
 {
-    if (checker->PagesLearned)
+    if (checker->IsPagesLearned())
+    {
         pagesStatus->setText("Pages: learned");
+        ui->pushButtonTestPage->setEnabled(true);
+    }
     else
+    {
         pagesStatus->setText("Pages: unknown");
+        ui->pushButtonTestPage->setEnabled(false);
+    }
 
-    if (checker->ParamsLearned)
+    if (checker->IsParamsLearned())
+    {
         paramsStatus->setText("Params: learned");
+        ui->pushButtonTestParams->setEnabled(true);
+    }
     else
+    {
         paramsStatus->setText("Params: unknown");
+        ui->pushButtonTestParams->setEnabled(false);
+    }
+
+    if (checker->IsPagesLearned() && checker->IsParamsLearned())
+    {
+        ui->pushButtonTestBoth->setEnabled(true);
+        ui->pushButtonTestBatch->setEnabled(true);
+    }
+    else
+    {
+        ui->pushButtonTestBoth->setEnabled(false);
+        ui->pushButtonTestBatch->setEnabled(false);
+    }
 }
 
-void MainWindow::showEvent(QShowEvent* ev)
-{
-    QMainWindow::showEvent(ev);
+
+string MainWindow::GetLearningParamsFromGUI() {
+    stringstream str;
+    str << fixed << setprecision(1) << (ui->doubleSpinBoxWeight->value()) << "; "
+    << (ui->doubleSpinBoxHeight->value()) << "; "
+    << (ui->doubleSpinBoxWidth->value()) << "; "
+    << (ui->doubleSpinBoxThickness->value()) << "; "
+    << (ui->doubleSpinBoxPages->value());
+
+    return str.str();
 }
+
+string MainWindow::GetTestParamsFromGUI() {
+    stringstream str;
+    str << fixed << setprecision(1) << (ui->doubleSpinBoxWeightTest->value()) << "; "
+    << (ui->doubleSpinBoxHeightTest->value()) << "; "
+    << (ui->doubleSpinBoxWidthTest->value()) << "; "
+    << (ui->doubleSpinBoxThicknessTest->value()) << "; "
+    << (ui->doubleSpinBoxPagesTest->value());
+
+    return str.str();
+}
+
+//=================================================
 
 void MainWindow::on_pushButtonLearnPages_clicked()
 {
+    if (ui->textEditBad->toPlainText().length() == 0 || ui->textEditGood->toPlainText().length() == 0)
+    {
+        Logger::Print() << "Pages to learn not selected" << endl;
+        return;
+    }
+
+    Logger::Print() << "Started learning of pages" << endl;
     trainThread = new TrainThread(checker, true, this);
     connect(trainThread, SIGNAL(finished()), this, SLOT(trainPagesFinished()));
 
     connect(t, SIGNAL(timeout()), this, SLOT(trainPagesStatusbar()));
     t->start();
     trainThread->start();
+    ui->tabWidget->setEnabled(false);
 }
 
 void MainWindow::trainPagesFinished()
@@ -83,16 +137,16 @@ void MainWindow::trainPagesFinished()
     t->stop();
     delete trainThread;
 
-    Logger::Print() << "Learned pages patterns with error " << to_string(checker->LastPagesError()) << endl;
-    checker->PagesLearned = true;
-    SetStatus();
+    Logger::Print() << "Learning pages patterns finished with error " << to_string(checker->LastPagesError()) << endl;
+    SetNetsStatus();
+    ui->tabWidget->setEnabled(true);
 }
 
 void MainWindow::trainPagesStatusbar()
 {
-    QString text("Learning... Current error: ");
+    QString text("Learning pages... Current error: ");
     text += QString::number(checker->LastPagesError());
-    ui->statusBar->showMessage(text, 1000);
+    ui->statusBar->showMessage(text, DELAY);
 }
 
 void MainWindow::on_pushButtonAddGood_clicked()
@@ -134,3 +188,116 @@ void MainWindow::on_pushButtonClearBad_clicked()
     ui->textEditBad->clear();
     Logger::Print() << "Cleared bad pages list" << endl;
 }
+
+//=================================================
+
+void MainWindow::on_pushButtonTestPage_clicked()
+{
+    if (pageToVerify.length() > 0)
+    {
+        bool result = checker->VerifyPage(pageToVerify);
+        Logger::Print() << "Verified page \"" << (pageToVerify.split("/").last().toUtf8().constData()) << "\" - " << (result ? "good" : "bad") << " page" << endl;
+    }
+    else
+        Logger::Print() << "Page to verify not selected" << endl;
+
+}
+
+void MainWindow::on_pushButtonTestLoadPage_clicked()
+{
+    pageToVerify = QFileDialog::getOpenFileName(this, tr("Select image"), QString(), tr("Image Files (*.png *.jpg *.bmp)"));
+    Logger::Print() << "Selected page to verify - \"" << (pageToVerify.split("/").last().toUtf8().constData()) << "\"" << endl;
+}
+
+
+void MainWindow::on_pushButtonTestParams_clicked()
+{
+    bool result = checker->VerifyParams(QString::fromStdString(GetTestParamsFromGUI()));
+    Logger::Print() << "Verified book with params " << GetTestParamsFromGUI() << " - " << (result ? "good" : "bad") << " print" << endl;
+}
+
+void MainWindow::on_pushButtonTestBoth_clicked()
+{
+    if (pageToVerify.length() > 0)
+    {
+        bool resultPage = checker->VerifyPage(pageToVerify);
+
+        bool resultParams = checker->VerifyParams(QString::fromStdString(GetTestParamsFromGUI()));
+
+        Logger::Print() << "Verified book with params " << GetTestParamsFromGUI() << " and page \"" << (pageToVerify.split("/").last().toUtf8().constData()) << "\" - "
+                        << ((resultPage && resultParams)?"good" : "bad") << " print" <<endl;
+    }
+    else
+        Logger::Print() << "Page to verify not selected" << endl;
+}
+
+//=================================================
+
+
+void MainWindow::on_pushButtonClearParams_clicked()
+{
+    checker->ClearParamsToLearn();
+    ui->textEditParams->clear();
+    Logger::Print() << "Cleared params to learn list" << endl;
+}
+
+void MainWindow::on_pushButton_clicked()
+{
+    checker->AddParamsToLearn(QString::fromStdString(GetLearningParamsFromGUI()));
+
+    ui->textEditParams->append(QString::fromStdString(GetLearningParamsFromGUI()));
+    Logger::Print() << "Added params dataset to learn" << endl;
+
+}
+
+void MainWindow::on_pushButtonLearnParams_clicked()
+{
+    if (ui->textEditParams->toPlainText().length() == 0)
+    {
+        Logger::Print() << "Params to learn not defined" << endl;
+        return;
+    }
+
+    Logger::Print() << "Started learning of params" << endl;
+    trainThread = new TrainThread(checker, false, this);
+    connect(trainThread, SIGNAL(finished()), this, SLOT(trainParamsFinished()));
+
+    connect(t, SIGNAL(timeout()), this, SLOT(trainParamsStatusbar()));
+    t->start();
+    trainThread->start();
+    ui->tabWidget->setEnabled(false);
+}
+
+void MainWindow::trainParamsFinished()
+{
+    t->stop();
+    delete trainThread;
+    trainThread = NULL;
+
+    Logger::Print() << "Learning params patterns finished with error " << to_string(checker->LastParamsError()) << endl;
+    SetNetsStatus();
+    ui->tabWidget->setEnabled(true);
+}
+
+
+void MainWindow::trainParamsStatusbar()
+{
+    QString text("Learning params... Current error: ");
+    text += QString::number(checker->LastParamsError());
+    ui->statusBar->showMessage(text, DELAY);
+}
+
+void MainWindow::on_pushButtonResetPages_clicked()
+{
+    checker->ResetPagesNet();
+    SetNetsStatus();
+    Logger::Print() << "Pages checker reset" << endl;
+}
+
+void MainWindow::on_pushButtonResetParams_clicked()
+{
+    checker->ResetParamsNet();
+    SetNetsStatus();
+    Logger::Print() << "Params checker reset" << endl;
+}
+

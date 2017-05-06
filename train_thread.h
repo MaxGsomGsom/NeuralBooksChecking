@@ -10,7 +10,6 @@ public:
     {
         this->trainPages = trainPages;
         this->checker = checker;
-        this->trainParams = !trainPages;
     }
 
     ~TrainThread() {}
@@ -20,12 +19,12 @@ protected:
     {
         if (trainPages)
             checker->LearnPages();
-        //if (trainParams) checker->
+        else
+            checker->LearnParams();
     }
 
 private:
     bool trainPages;
-    bool trainParams;
     BooksChecker* checker;
 };
 

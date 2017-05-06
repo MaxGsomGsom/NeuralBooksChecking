@@ -62,7 +62,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>2</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="tabMain">
      <attribute name="title">
@@ -89,6 +89,15 @@
          <height>25</height>
         </rect>
        </property>
+       <property name="decimals">
+        <number>1</number>
+       </property>
+       <property name="maximum">
+        <double>1000.000000000000000</double>
+       </property>
+       <property name="value">
+        <double>210.000000000000000</double>
+       </property>
       </widget>
       <widget class="QDoubleSpinBox" name="doubleSpinBoxWeightTest">
        <property name="geometry">
@@ -98,6 +107,15 @@
          <width>66</width>
          <height>25</height>
         </rect>
+       </property>
+       <property name="decimals">
+        <number>1</number>
+       </property>
+       <property name="maximum">
+        <double>10000.000000000000000</double>
+       </property>
+       <property name="value">
+        <double>200.000000000000000</double>
        </property>
       </widget>
       <widget class="QLabel" name="labelWidthTest">
@@ -148,6 +166,15 @@
          <height>25</height>
         </rect>
        </property>
+       <property name="decimals">
+        <number>1</number>
+       </property>
+       <property name="maximum">
+        <double>1000.000000000000000</double>
+       </property>
+       <property name="value">
+        <double>148.000000000000000</double>
+       </property>
       </widget>
       <widget class="QLabel" name="labelWeightTest">
        <property name="geometry">
@@ -171,6 +198,15 @@
          <height>25</height>
         </rect>
        </property>
+       <property name="decimals">
+        <number>1</number>
+       </property>
+       <property name="maximum">
+        <double>10000.000000000000000</double>
+       </property>
+       <property name="value">
+        <double>700.000000000000000</double>
+       </property>
       </widget>
       <widget class="QDoubleSpinBox" name="doubleSpinBoxThicknessTest">
        <property name="geometry">
@@ -180,6 +216,15 @@
          <width>66</width>
          <height>25</height>
         </rect>
+       </property>
+       <property name="decimals">
+        <number>1</number>
+       </property>
+       <property name="maximum">
+        <double>1000.000000000000000</double>
+       </property>
+       <property name="value">
+        <double>50.000000000000000</double>
        </property>
       </widget>
       <widget class="QLabel" name="labelHeightTest">
@@ -317,9 +362,21 @@
         <rect>
          <x>10</x>
          <y>70</y>
-         <width>171</width>
+         <width>181</width>
          <height>111</height>
         </rect>
+       </property>
+       <property name="verticalScrollBarPolicy">
+        <enum>Qt::ScrollBarAlwaysOn</enum>
+       </property>
+       <property name="horizontalScrollBarPolicy">
+        <enum>Qt::ScrollBarAlwaysOff</enum>
+       </property>
+       <property name="lineWrapMode">
+        <enum>QTextEdit::NoWrap</enum>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
        </property>
       </widget>
      </widget>
@@ -449,6 +506,15 @@
          <height>25</height>
         </rect>
        </property>
+       <property name="decimals">
+        <number>1</number>
+       </property>
+       <property name="maximum">
+        <double>10000.000000000000000</double>
+       </property>
+       <property name="value">
+        <double>200.000000000000000</double>
+       </property>
       </widget>
       <widget class="QDoubleSpinBox" name="doubleSpinBoxHeight">
        <property name="geometry">
@@ -459,6 +525,15 @@
          <height>25</height>
         </rect>
        </property>
+       <property name="decimals">
+        <number>1</number>
+       </property>
+       <property name="maximum">
+        <double>1000.000000000000000</double>
+       </property>
+       <property name="value">
+        <double>210.000000000000000</double>
+       </property>
       </widget>
       <widget class="QDoubleSpinBox" name="doubleSpinBoxWidth">
        <property name="geometry">
@@ -468,6 +543,15 @@
          <width>66</width>
          <height>25</height>
         </rect>
+       </property>
+       <property name="decimals">
+        <number>1</number>
+       </property>
+       <property name="maximum">
+        <double>1000.000000000000000</double>
+       </property>
+       <property name="value">
+        <double>148.000000000000000</double>
        </property>
       </widget>
       <widget class="QLabel" name="labelWidth">
@@ -505,6 +589,15 @@
          <height>25</height>
         </rect>
        </property>
+       <property name="decimals">
+        <number>1</number>
+       </property>
+       <property name="maximum">
+        <double>1000.000000000000000</double>
+       </property>
+       <property name="value">
+        <double>50.000000000000000</double>
+       </property>
       </widget>
       <widget class="QLabel" name="labelPages">
        <property name="geometry">
@@ -528,6 +621,15 @@
          <height>25</height>
         </rect>
        </property>
+       <property name="decimals">
+        <number>1</number>
+       </property>
+       <property name="maximum">
+        <double>10000.000000000000000</double>
+       </property>
+       <property name="value">
+        <double>700.000000000000000</double>
+       </property>
       </widget>
       <widget class="QPushButton" name="pushButton">
        <property name="geometry">
@@ -542,7 +644,7 @@
         <string>Add dataset</string>
        </property>
       </widget>
-      <widget class="QPushButton" name="pushButtonLoadParams_2">
+      <widget class="QPushButton" name="pushButtonLoadParamsDatasets">
        <property name="geometry">
         <rect>
          <x>230</x>
@@ -560,9 +662,21 @@
         <rect>
          <x>230</x>
          <y>70</y>
-         <width>171</width>
+         <width>181</width>
          <height>101</height>
         </rect>
+       </property>
+       <property name="verticalScrollBarPolicy">
+        <enum>Qt::ScrollBarAlwaysOn</enum>
+       </property>
+       <property name="horizontalScrollBarPolicy">
+        <enum>Qt::ScrollBarAlwaysOff</enum>
+       </property>
+       <property name="lineWrapMode">
+        <enum>QTextEdit::NoWrap</enum>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
        </property>
       </widget>
       <widget class="QPushButton" name="pushButtonClearParams">
