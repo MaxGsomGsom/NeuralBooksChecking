@@ -23,7 +23,7 @@ public:
 private:
     Ui::MainWindow* ui;
     BooksChecker* checker;
-    Logger *logger;
+    Logger* logger;
     QLabel* paramsStatus;
     QLabel* pagesStatus;
     void SetNetsStatus();
@@ -52,6 +52,10 @@ private slots:
     void on_pushButtonResetParams_clicked();
     void on_pushButtonTestParams_clicked();
     void on_pushButtonTestBoth_clicked();
+    void on_pushButtonLoadParamsDatasets_clicked();
+    void on_pushButtonTestClear_clicked();
+    void on_pushButtonLoadBatch_clicked();
+    void on_pushButtonTestBatch_clicked();
 };
 
 #endif // MAINWINDOW_H

@@ -26,6 +26,9 @@ public:
     void ResetParamsNet();
     void ResetPagesNet();
     bool VerifyParams(QString params); //weight; height; width; thickness; pagesNum
+    void AddBooksToVerify(QString params); //weight; height; width; thickness; pagesNum; page filename
+    void ClearBooksToVerify();
+    vector<int> VerifyBooks();
 
 private:
     Neuronet<> pagesChecker;
@@ -33,6 +36,8 @@ private:
     vector<QString> badPages;
     Neuronet<> paramsChecker;
     vector<vector<float>> paramsToLearn;
+    vector< vector<float> > booksToVerify;
+    vector<QString> pagesToVerify;
 };
 
 #endif // BOOKS_CHECKER_H
