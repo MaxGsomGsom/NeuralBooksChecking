@@ -1,10 +1,7 @@
 #ifndef LAYER_H
 #define LAYER_H
 
-#include <vector>
 #include <neuron.h>
-#include <cstdlib>
-#include <cmath>
 
 namespace Neuronets
 {
@@ -12,15 +9,18 @@ namespace Neuronets
 template<class T = Neuron>
 class Layer
 {
+private:
+    float inputsize;
+
 protected:
-    vector<float> layerinput; //The layer input
-    vector<T> neurons; //The array of neurons
+    QVector<float> layerinput; //The layer input
+    QVector<T> neurons; //The array of neurons
 
 public:
     Layer() {} //Constructor
     ~Layer() {} //Destructor
-    int InputCount() { return layerinput.size(); } //get layerinput size
-    int NeuronsCount() { return neurons.size(); } //get neurons size
+    qint32 InputCount() { return inputsize; } //get layerinput size
+    qint32 NeuronsCount() { return neurons.size(); } //get neurons size
     T& Neuron(int i) //iterrator
     {
         OUT_OF_RANGE_EX(i >= 0 && i < neurons.size())
@@ -38,6 +38,7 @@ public:
             neurons[i].Create(inputsize, randgain);
         }
 
+        this->inputsize = inputsize;
         layerinput.resize(inputsize);
     }
 
@@ -45,23 +46,23 @@ public:
     void Calculate()
     {
         //Apply the formula for each neuron
-        for (uint i = 0; i < neurons.size(); i++)
+        for (int i = 0; i < neurons.size(); i++)
         {
-            neurons[i].Calculate(&layerinput);
+            neurons[i].Calculate(layerinput);
         }
     }
 
     //Fill layerinput with new elements
-    void PushInput(vector<float>* input)
+    void PushInput(const QVector<float> &input)
     {
-        VECTOR_SIZE_EX(input && input->size() == layerinput.size())
+        VECTOR_SIZE_EX(input.size() == layerinput.size())
 
-        copy(input->begin(), input->end(), layerinput.begin());
+        copy(input.begin(), input.end(), layerinput.begin());
     }
 
-    vector<float> GetOutput()
+    QVector<float> GetOutput()
     {
-        vector<float> output;
+        QVector<float> output;
         for (int i = 0; i < neurons.size(); i++)
         {
             output.push_back(neurons[i].GetOutput());
@@ -81,6 +82,18 @@ public:
             neurons[i].momentum = momentum;
         }
     }
+
+    friend QDataStream &operator<<(QDataStream &out, const Layer &obj)
+    {
+        out << obj.neurons << obj.inputsize;
+        return out;
+    }
+
+    friend QDataStream &operator>>(QDataStream &in, Layer &obj) {
+        in >> obj.neurons >> obj.inputsize;
+        obj.layerinput.resize(obj.inputsize);
+        return in;
+    }
 };
 
 
@@ -92,9 +105,9 @@ class InputLayer: public Layer<T>
 public:
     void Train(float errsum)
     {
-        for (uint i = 0; i < this->neurons.size(); i++)
+        for (int i = 0; i < this->neurons.size(); i++)
         {
-            this->neurons[i].Train(&(this->layerinput), errsum);
+            this->neurons[i].Train(this->layerinput, errsum);
         }
     }
 };
@@ -109,11 +122,11 @@ public:
     float Train(float errsum)
     {
         float csum = 0;
-        for (uint j = 0; j < this->neurons.size(); j++)
+        for (int j = 0; j < this->neurons.size(); j++)
         {
             //The general error is the sum of delta values. Where delta is the squared difference
             //of the desired value with the output value
-            csum += this->neurons[j].Train(&(this->layerinput), errsum);
+            csum += this->neurons[j].Train(this->layerinput, errsum);
         }
         return csum;
     }
@@ -126,27 +139,27 @@ template<class T = OutputNeuron>
 class OutputLayer: public Layer<T>
 {
 public:
-    float Train(vector<float>* desiredoutput)
+    float Train(const QVector<float> &desiredoutput)
     {
-        VECTOR_SIZE_EX(desiredoutput && desiredoutput->size() == this->neurons.size())
+        VECTOR_SIZE_EX(desiredoutput.size() == this->neurons.size())
 
         float errsum = 0;
-        for (uint i = 0; i < this->neurons.size(); i++)
+        for (int i = 0; i < this->neurons.size(); i++)
         {
-            errsum += this->neurons[i].Train(&(this->layerinput), desiredoutput->at(i));
+            errsum += this->neurons[i].Train(this->layerinput, desiredoutput.at(i));
         }
 
         return errsum;
     }
 
-    float EstimateError(vector<float>* desiredoutput)
+    float EstimateError(const QVector<float> &desiredoutput)
     {
-        VECTOR_SIZE_EX(desiredoutput && desiredoutput->size() == this->neurons.size())
+        VECTOR_SIZE_EX(desiredoutput.size() == this->neurons.size())
 
         float errorg = 0;
-        for (uint i = 0; i < this->neurons.size(); i++)
+        for (int i = 0; i < this->neurons.size(); i++)
         {
-            errorg += pow((desiredoutput->at(i) - this->neurons[i].GetOutput()), 2.f);
+            errorg += pow((desiredoutput.at(i) - this->neurons[i].GetOutput()), 2.f);
         }
 
         return errorg / 2;

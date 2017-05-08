@@ -1,0 +1,2 @@
+200.0; 210.0; 148.0; 50.0; 700.0; /home/max/QtProjects/build-NeuralBooksChecking-Desktop_Qt_5_4_2_GCC_64bit-Debug/tests/test1.png
+213.0; 250.0; 248.0; 30.0; 600.0; /home/max/QtProjects/build-NeuralBooksChecking-Desktop_Qt_5_4_2_GCC_64bit-Debug/tests/test2.png

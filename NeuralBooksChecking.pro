@@ -17,13 +17,13 @@ SOURCES += main.cpp\
     books_checker.cpp
 
 HEADERS  += mainwindow.h \
-    layer.h \
     neuron.h \
     neuronet.h \
     exceptions.h \
     books_checker.h \
     logger.h \
-    train_thread.h
+    train_thread.h \
+    neurolayer.h
 
 FORMS    += mainwindow.ui
 

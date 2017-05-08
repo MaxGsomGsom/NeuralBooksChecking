@@ -2,7 +2,6 @@
 #define BOOKS_CHECKER_H
 
 #include <neuronet.h>
-#include <QString>
 
 using namespace Neuronets;
 
@@ -28,16 +27,20 @@ public:
     bool VerifyParams(QString params); //weight; height; width; thickness; pagesNum
     void AddBooksToVerify(QString params); //weight; height; width; thickness; pagesNum; page filename
     void ClearBooksToVerify();
-    vector<int> VerifyBooks();
+    QVector<int> VerifyBooks();
+    bool SavePagesNet(QString file);
+    bool SaveParamsNet(QString file);
+    bool LoadPagesNet(QString file);
+    bool LoadParamsNet(QString file);
 
 private:
     Neuronet<> pagesChecker;
-    vector<QString> goodPages;
-    vector<QString> badPages;
+    QVector<QString> goodPages;
+    QVector<QString> badPages;
     Neuronet<> paramsChecker;
-    vector<vector<float>> paramsToLearn;
-    vector< vector<float> > booksToVerify;
-    vector<QString> pagesToVerify;
+    QVector<QVector<float>> paramsToLearn;
+    QVector< QVector<float> > booksToVerify;
+    QVector<QString> pagesToVerify;
 };
 
 #endif // BOOKS_CHECKER_H

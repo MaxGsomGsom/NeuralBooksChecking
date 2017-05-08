@@ -1,24 +1,19 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include <iostream>
-#include <streambuf>
 #include <QFileDialog>
-#include <QLabel>
 #include <QTimer>
-#include <train_thread.h>
 #include <iomanip>
 #include <sstream>
-#include <QFile>
 #include <QTextStream>
 
 #define DELAY 500
+#define DELAY_LONG 2000
 
 using namespace std;
 
 /*TODO:
 1. Реализовать все методы, представленные в интерфейсе
 2. При запуске программы должны загружаться последние настройки нейросетей
-3. Реализовать отдельный класс для хранения параметров с сериализацией в файл
 6. Также отчеты о пакетной проверке книг должны сохраняться в отдельных лог-файлах
 */
 
@@ -40,6 +35,18 @@ MainWindow::MainWindow(QWidget* parent) :
     t->setInterval(DELAY);
 
     checker = new BooksChecker();
+
+
+    if (QFile::exists(pagesSetting)) {
+        checker->LoadPagesNet(pagesSetting);
+        Logger::Print() << "Loaded pages checker data" << endl;
+    }
+    if (QFile::exists(paramsSetting)) {
+        checker->LoadParamsNet(paramsSetting);
+        Logger::Print() << "Loaded params checker data" << endl;
+    }
+
+
     SetNetsStatus();
 
 }
@@ -145,6 +152,8 @@ void MainWindow::trainPagesFinished()
     Logger::Print() << "Learning pages patterns finished with error " << to_string(checker->LastPagesError()) << endl;
     SetNetsStatus();
     ui->tabWidget->setEnabled(true);
+
+    checker->SavePagesNet(pagesSetting);
 }
 
 void MainWindow::trainPagesStatusbar()
@@ -198,7 +207,7 @@ void MainWindow::on_pushButtonClearBad_clicked()
 
 void MainWindow::on_pushButtonTestPage_clicked()
 {
-    ui->statusBar->showMessage("Verifying page...", 2000);
+    ui->statusBar->showMessage("Verifying page...", DELAY_LONG);
 
     if (pageToVerify.length() > 0)
     {
@@ -218,7 +227,7 @@ void MainWindow::on_pushButtonTestLoadPage_clicked()
 
 void MainWindow::on_pushButtonTestParams_clicked()
 {
-    ui->statusBar->showMessage("Verifying book params...", 2000);
+    ui->statusBar->showMessage("Verifying book params...", DELAY_LONG);
 
     bool result = checker->VerifyParams(QString::fromStdString(GetTestParamsFromGUI()));
     Logger::Print() << "Verified book with params " << GetTestParamsFromGUI() << " - " << (result ? "good" : "bad") << " print" << endl;
@@ -227,7 +236,7 @@ void MainWindow::on_pushButtonTestParams_clicked()
 
 void MainWindow::on_pushButtonTestBoth_clicked()
 {
-    ui->statusBar->showMessage("Verifying book...", 2000);
+    ui->statusBar->showMessage("Verifying book...", DELAY_LONG);
 
     QFile file(pageToVerify);
     if (file.exists())
@@ -258,7 +267,7 @@ void MainWindow::on_pushButtonLoadBatch_clicked()
     if (filename.length() == 0)
         return;
 
-    vector<QString> lines;
+    QVector<QString> lines;
 
     QFile file(filename);
     file.open(QIODevice::ReadOnly);
@@ -274,7 +283,7 @@ void MainWindow::on_pushButtonLoadBatch_clicked()
 
     int addedNum = lines.size();
 
-    for (uint i = 0; i < lines.size(); i++)
+    for (int i = 0; i < lines.size(); i++)
     {
         QStringList list = lines[i].split(";");
 
@@ -304,11 +313,11 @@ void MainWindow::on_pushButtonTestBatch_clicked()
         return;
     }
 
-    ui->statusBar->showMessage("Verifying books...", 2000);
-    vector<int> result = checker->VerifyBooks();
+    ui->statusBar->showMessage("Verifying books...", DELAY_LONG);
+    QVector<int> result = checker->VerifyBooks();
     QStringList books = ui->textEditParamsBatch->toPlainText().split("\n");
 
-    for (uint i = 0; i < result.size(); i++)
+    for (int i = 0; i < result.size(); i++)
     {
         if (result[i] == -1)
         {
@@ -373,6 +382,8 @@ void MainWindow::trainParamsFinished()
     Logger::Print() << "Learning params patterns finished with error " << to_string(checker->LastParamsError()) << endl;
     SetNetsStatus();
     ui->tabWidget->setEnabled(true);
+
+    checker->SaveParamsNet(paramsSetting);
 }
 
 void MainWindow::trainParamsStatusbar()
@@ -387,6 +398,8 @@ void MainWindow::on_pushButtonResetPages_clicked()
     checker->ResetPagesNet();
     SetNetsStatus();
     Logger::Print() << "Pages checker reset" << endl;
+
+    QFile::remove(pagesSetting);
 }
 
 void MainWindow::on_pushButtonResetParams_clicked()
@@ -394,6 +407,8 @@ void MainWindow::on_pushButtonResetParams_clicked()
     checker->ResetParamsNet();
     SetNetsStatus();
     Logger::Print() << "Params checker reset" << endl;
+
+    QFile::remove(paramsSetting);
 }
 
 void MainWindow::on_pushButtonLoadParamsDatasets_clicked()
@@ -403,7 +418,7 @@ void MainWindow::on_pushButtonLoadParamsDatasets_clicked()
     if (filename.length() == 0)
         return;
 
-    vector<QString> lines;
+    QVector<QString> lines;
 
     QFile file(filename);
     file.open(QIODevice::ReadOnly);
@@ -419,7 +434,7 @@ void MainWindow::on_pushButtonLoadParamsDatasets_clicked()
 
     int addedNum = lines.size();
 
-    for (uint i = 0; i < lines.size(); i++)
+    for (int i = 0; i < lines.size(); i++)
     {
         QStringList list = lines[i].split(";");
 
@@ -448,4 +463,59 @@ void MainWindow::on_pushButtonLoadParamsDatasets_clicked()
 
 
     Logger::Print() << "Added " << to_string(addedNum) << " params datasets to learn" << endl;
+}
+
+void MainWindow::on_pushButtonSavePages_clicked()
+{
+    QString filename = QFileDialog::getSaveFileName(this, tr("Select file"), QString(), tr("Neural nets Files (*.nn)"));
+    if (filename.length() == 0)
+        return;
+    if (filename.split(".").last() != QString("nn")) filename.append(".nn");
+
+    if (checker->SavePagesNet(filename))
+        Logger::Print() << "Pages checker data successfully saved" << endl;
+    else Logger::Print() << "Error while saving pages checker data" << endl;
+
+}
+
+void MainWindow::on_pushButtonSaveParams_clicked()
+{
+    QString filename = QFileDialog::getSaveFileName(this, tr("Select file"), QString(), tr("Neural nets Files (*.nn)"));
+    if (filename.length() == 0)
+        return;
+    if (filename.split(".").last() != QString("nn")) filename.append(".nn");
+
+    if (checker->SaveParamsNet(filename))
+        Logger::Print() << "Params checker data successfully saved" << endl;
+    else Logger::Print() << "Error while saving params checker data" << endl;
+}
+
+void MainWindow::on_pushButtonLoadPages_clicked()
+{
+    QString filename = QFileDialog::getOpenFileName(this, tr("Select file"), QString(), tr("Neural nets Files (*.nn)"));
+    if (filename.length() == 0)
+        return;
+
+    if (checker->LoadPagesNet(filename))
+        Logger::Print() << "Pages checker data successfully loaded" << endl;
+    else Logger::Print() << "Error while loading pages checker data" << endl;
+
+    SetNetsStatus();
+
+    checker->SavePagesNet(pagesSetting);
+}
+
+void MainWindow::on_pushButtonLoadParams_clicked()
+{
+    QString filename = QFileDialog::getOpenFileName(this, tr("Select file"), QString(), tr("Neural nets Files (*.nn)"));
+    if (filename.length() == 0)
+        return;
+
+    if (checker->LoadParamsNet(filename))
+        Logger::Print() << "Params checker data successfully loaded" << endl;
+    else Logger::Print() << "Error while loading params checker data" << endl;
+
+    SetNetsStatus();
+
+    checker->SaveParamsNet(paramsSetting);
 }

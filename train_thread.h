@@ -1,7 +1,8 @@
 #ifndef TRAIN_THREAD
 #define TRAIN_THREAD
-#include <QThread>
+
 #include <books_checker.h>
+#include <QThread>
 
 class TrainThread: public QThread
 {

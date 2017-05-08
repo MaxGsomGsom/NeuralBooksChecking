@@ -1,10 +1,10 @@
 #ifndef NEURON_H
 #define NEURON_H
 
-#include <vector>
-#include <cstdlib>
-#include <cmath>
 #include <exceptions.h>
+#include <QDataStream>
+#include <QVector>
+#include <QtGlobal>
 
 using namespace std;
 
@@ -16,14 +16,14 @@ class Neuron
 protected:
     float wgain; //Weight gain value
     float output; //Output value
-    vector<float> weights; //Neuron input weights or synaptic connections
-    vector<float> deltavalues; //Neuron delta values
+    QVector<float> weights; //Neuron input weights or synaptic connections
+    QVector<float> deltavalues; //Neuron delta values
 
 public:
     Neuron() {} //Constructor
     ~Neuron() {} //Destructor
     float GetOutput() { return output; } //Get neuron output
-    int InputCount() { return weights.size(); } //Get input and weights count
+    qint32 InputCount() { return weights.size(); } //Get input and weights count
     float gain = 1; //Gain value (default = 1)
     float alpha = 0.2; //Train parameter
     float momentum = 0.1; //Train parameter
@@ -50,18 +50,30 @@ public:
     }
 
     //Calculates neuron with formula
-    void Calculate(vector<float>* input)
+    void Calculate(const QVector<float> &input)
     {
-        VECTOR_SIZE_EX(input && input->size() == weights.size())
+        VECTOR_SIZE_EX(input.size() == weights.size())
 
         float sum = 0; //Store the sum of all values here
-        for (uint j = 0; j < input->size(); j++)
+        for (int j = 0; j < input.size(); j++)
         {
-            sum += weights[j] * input->at(j); //apply input * weight
+            sum += weights[j] * input.at(j); //apply input * weight
         }
         sum += wgain * gain; //Apply the gain or theta multiplied by the gain weight
         output = 1.f / (1.f + exp(-sum)); //Sigmoidal activation function
-        //neurons[i]->output=-1 + 2*(1.f + exp(-sum));
+        //neurons[i].output=-1 + 2*(1.f + exp(-sum));
+    }
+
+    friend QDataStream &operator<<(QDataStream &out, const Neuron &obj)
+    {
+        out << obj.wgain << obj.gain << obj.alpha << obj.momentum << obj.weights;
+        return out;
+    }
+
+    friend QDataStream &operator>>(QDataStream &in, Neuron &obj) {
+        in >> obj.wgain >> obj.gain >> obj.alpha >> obj.momentum >> obj.weights;
+        obj.deltavalues.resize(obj.weights.size());
+        return in;
     }
 };
 
@@ -70,15 +82,15 @@ public:
 class InputNeuron: public Neuron
 {
 public:
-    void Train(vector<float>* layerinput, float errsum)
+    void Train(const QVector<float> &layerinput, float errsum)
     {
-        VECTOR_SIZE_EX(layerinput && layerinput->size() == weights.size())
+        VECTOR_SIZE_EX(layerinput.size() == weights.size())
 
         float errorc = output * (1 - output) * errsum;
 
-        for (uint j = 0; j < layerinput->size(); j++)
+        for (int j = 0; j < layerinput.size(); j++)
         {
-            float udelta = alpha * errorc * layerinput->at(j) + deltavalues[j] * momentum;
+            float udelta = alpha * errorc * layerinput.at(j) + deltavalues[j] * momentum;
             //Update weights
             weights[j] += udelta;
             deltavalues[j] = udelta;
@@ -93,9 +105,9 @@ public:
 class HiddenNeuron: public Neuron
 {
 public:
-    float Train(vector<float>* layerinput, float errsum)
+    float Train(const QVector<float> &layerinput, float errsum)
     {
-        VECTOR_SIZE_EX(layerinput && layerinput->size() == weights.size())
+        VECTOR_SIZE_EX(layerinput.size() == weights.size())
 
         float cerrsum = 0; //Neded for next layer
 
@@ -103,9 +115,9 @@ public:
         float errorc = output * (1 - output) * errsum;
 
         //Update neuron weights
-        for (uint k = 0; k < layerinput->size(); k++)
+        for (int k = 0; k < layerinput.size(); k++)
         {
-            float udelta = alpha * errorc * layerinput->at(k) + deltavalues[k] * momentum;
+            float udelta = alpha * errorc * layerinput.at(k) + deltavalues[k] * momentum;
             weights[k] += udelta;
             deltavalues[k] = udelta;
             cerrsum += weights[k] * errorc;
@@ -122,9 +134,9 @@ public:
 class OutputNeuron: public Neuron
 {
 public:
-    float Train(vector<float>* layerinput, float desiredoutput)
+    float Train(const QVector<float> &layerinput, float desiredoutput)
     {
-        VECTOR_SIZE_EX(layerinput && layerinput->size() == weights.size())
+        VECTOR_SIZE_EX(layerinput.size() == weights.size())
 
         float errsum = 0;
 
@@ -132,10 +144,10 @@ public:
         float errorc = (desiredoutput - output) * output * (1 - output);
 
         //Now we proceed to update the weights of the neuron
-        for (uint j = 0; j < layerinput->size(); j++)
+        for (int j = 0; j < layerinput.size(); j++)
         {
             //Update the delta value
-            float udelta = alpha * errorc * layerinput->at(j) + deltavalues[j] * momentum;
+            float udelta = alpha * errorc * layerinput.at(j) + deltavalues[j] * momentum;
             //Update the weight values
             weights[j] += udelta;
             deltavalues[j] = udelta;

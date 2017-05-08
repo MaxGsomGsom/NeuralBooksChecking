@@ -2,9 +2,9 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QLabel>
 #include <books_checker.h>
 #include <logger.h>
-#include <QLabel>
 #include <train_thread.h>
 
 namespace Ui
@@ -32,6 +32,8 @@ private:
     QString pageToVerify;
     string GetLearningParamsFromGUI();
     string GetTestParamsFromGUI();
+    QString pagesSetting = QString("pages_setting.nn");
+    QString paramsSetting = QString("params_setting.nn");
 
 private slots:
     void on_pushButtonLearnPages_clicked();
@@ -56,6 +58,10 @@ private slots:
     void on_pushButtonTestClear_clicked();
     void on_pushButtonLoadBatch_clicked();
     void on_pushButtonTestBatch_clicked();
+    void on_pushButtonSavePages_clicked();
+    void on_pushButtonSaveParams_clicked();
+    void on_pushButtonLoadPages_clicked();
+    void on_pushButtonLoadParams_clicked();
 };
 
 #endif // MAINWINDOW_H
