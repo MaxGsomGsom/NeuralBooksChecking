@@ -7,6 +7,8 @@
 #include <logger.h>
 #include <train_thread.h>
 
+using namespace books_checker;
+
 namespace Ui
 {
 class MainWindow;

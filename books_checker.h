@@ -5,6 +5,9 @@
 
 using namespace Neuronets;
 
+namespace books_checker
+{
+
 class BooksChecker
 {
 public:
@@ -42,5 +45,7 @@ private:
     QVector< QVector<float> > booksToVerify;
     QVector<QString> pagesToVerify;
 };
+
+}
 
 #endif // BOOKS_CHECKER_H

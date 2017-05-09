@@ -25,7 +25,8 @@ private:
     //and applying the backpropagation algorithm
     float TrainPattern(const QVector<float> &desiredoutput, const QVector<float> &pattern)
     {
-        VECTOR_SIZE_EX(desiredoutput.size() == outputsize && pattern.size() == inputsize)
+        if(!(desiredoutput.size() == outputsize && pattern.size() == inputsize))
+            throw WrongInputVectorSize(__FUNCTION__);
 
         //First we begin by propagating the input
         Propagate(pattern);
@@ -58,10 +59,11 @@ public:
     T_in& InputLayer() {return m_inputlayer; } //iterrator
     T_out& OutputLayer() {return m_outputlayer; } //iterrator
 
-    //iterrator
     T_hid& HiddenLayer(int i)
     {
-        OUT_OF_RANGE_EX(i < m_hiddenlayers.size() && i >= 0)
+        if(!(i < m_hiddenlayers.size() && i >= 0))
+            throw OutOfRange(__FUNCTION__);
+
         return m_hiddenlayers.at(i);
     }
 
@@ -74,7 +76,8 @@ public:
     //Creates the network structure on memory
     void Create(int inputcount, int inputneurons, int outputcount, const QVector<int> &hiddenlayers, float randgain = 1)
     {
-        WRONG_ARGS_EX(inputcount > 0 && inputneurons > 0 && outputcount > 0 && randgain > 0)
+        if(!(inputcount > 0 && inputneurons > 0 && outputcount > 0 && randgain > 0))
+            throw WrongInputArgs(__FUNCTION__);
 
         lastError = 0;
         isTrained = false;
@@ -110,7 +113,8 @@ public:
     //Calculates the network values given an input pattern
     void Propagate(const QVector<float> &input)
     {
-        VECTOR_SIZE_EX(input.size() == inputsize)
+        if(!(input.size() == inputsize))
+            throw WrongInputVectorSize(__FUNCTION__);
 
         //The propagation function should start from the input layer
         //first copy the input vector to the input layer
@@ -144,8 +148,11 @@ public:
     //Train all given patterns
     float TrainAll(const QVector< QVector<float> > &desiredoutputs, const QVector< QVector<float> > &patterns, int maxiteration = 10000, float stoperror = 0.001)
     {
-        WRONG_ARGS_EX(maxiteration > 0 && stoperror >= 0)
-        VECTOR_SIZE_EX(desiredoutputs.size() == patterns.size())
+        if(!(maxiteration > 0 && stoperror >= 0))
+            throw WrongInputArgs(__FUNCTION__);
+
+        if(!(desiredoutputs.size() == patterns.size()))
+            throw WrongInputVectorSize(__FUNCTION__);
 
         float error = 0;
         //Start the neural network training
@@ -172,8 +179,8 @@ public:
     //Set neurons params
     void SetParams(float gain = 1, float alpha = 0.2, float momentum = 0.1)
     {
-
-        WRONG_ARGS_EX(gain > 0 && alpha > 0 && alpha < 1 && momentum > 0 && momentum < 1)
+        if(!(gain > 0 && alpha > 0 && alpha < 1 && momentum > 0 && momentum < 1))
+            throw WrongInputArgs(__FUNCTION__);
 
         this->gain = gain;
         this->alpha = alpha;

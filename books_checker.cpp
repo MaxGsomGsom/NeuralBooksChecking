@@ -5,6 +5,7 @@
 
 using namespace Neuronets;
 using namespace std;
+using namespace books_checker;
 
 #define ITERS 10000
 
@@ -23,6 +24,7 @@ using namespace std;
 #define BORDER_PARAMS 0.9
 #define STOP_ERR_PARAMS 0.001
 #define DIFF 200
+
 
 BooksChecker::BooksChecker()
 {
@@ -284,9 +286,11 @@ QVector<int> BooksChecker::VerifyBooks()
 
 //=============================================
 
-bool BooksChecker::SavePagesNet(QString file){
+bool BooksChecker::SavePagesNet(QString file)
+{
     QFile outfile(file);
-    if (!outfile.open(QIODevice::WriteOnly)) return false;
+    if (!outfile.open(QIODevice::WriteOnly))
+        return false;
     QDataStream stream(&outfile);
 
     stream << pagesChecker;
@@ -294,9 +298,11 @@ bool BooksChecker::SavePagesNet(QString file){
     return true;
 }
 
-bool BooksChecker::SaveParamsNet(QString file){
+bool BooksChecker::SaveParamsNet(QString file)
+{
     QFile outfile(file);
-    if (!outfile.open(QIODevice::WriteOnly)) return false;
+    if (!outfile.open(QIODevice::WriteOnly))
+        return false;
     QDataStream stream(&outfile);
 
     stream << paramsChecker;
@@ -304,9 +310,11 @@ bool BooksChecker::SaveParamsNet(QString file){
     return true;
 }
 
-bool BooksChecker::LoadPagesNet(QString file){
+bool BooksChecker::LoadPagesNet(QString file)
+{
     QFile outfile(file);
-    if (!outfile.open(QIODevice::ReadOnly)) return false;
+    if (!outfile.open(QIODevice::ReadOnly))
+        return false;
     QDataStream stream(&outfile);
 
     stream >> pagesChecker;
@@ -314,9 +322,11 @@ bool BooksChecker::LoadPagesNet(QString file){
     return true;
 }
 
-bool BooksChecker::LoadParamsNet(QString file){
+bool BooksChecker::LoadParamsNet(QString file)
+{
     QFile outfile(file);
-    if (!outfile.open(QIODevice::ReadOnly)) return false;
+    if (!outfile.open(QIODevice::ReadOnly))
+        return false;
     QDataStream stream(&outfile);
 
     stream >> paramsChecker;

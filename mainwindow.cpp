@@ -11,13 +11,6 @@
 
 using namespace std;
 
-/*TODO:
-1. Реализовать все методы, представленные в интерфейсе
-2. При запуске программы должны загружаться последние настройки нейросетей
-6. Также отчеты о пакетной проверке книг должны сохраняться в отдельных лог-файлах
-*/
-
-
 MainWindow::MainWindow(QWidget* parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -37,18 +30,19 @@ MainWindow::MainWindow(QWidget* parent) :
     checker = new BooksChecker();
 
 
-    if (QFile::exists(pagesSetting)) {
+    if (QFile::exists(pagesSetting))
+    {
         checker->LoadPagesNet(pagesSetting);
         Logger::Print() << "Loaded pages checker data" << endl;
     }
-    if (QFile::exists(paramsSetting)) {
+    if (QFile::exists(paramsSetting))
+    {
         checker->LoadParamsNet(paramsSetting);
         Logger::Print() << "Loaded params checker data" << endl;
     }
 
 
     SetNetsStatus();
-
 }
 
 MainWindow::~MainWindow()
@@ -470,11 +464,13 @@ void MainWindow::on_pushButtonSavePages_clicked()
     QString filename = QFileDialog::getSaveFileName(this, tr("Select file"), QString(), tr("Neural nets Files (*.nn)"));
     if (filename.length() == 0)
         return;
-    if (filename.split(".").last() != QString("nn")) filename.append(".nn");
+    if (filename.split(".").last() != QString("nn"))
+        filename.append(".nn");
 
     if (checker->SavePagesNet(filename))
         Logger::Print() << "Pages checker data successfully saved" << endl;
-    else Logger::Print() << "Error while saving pages checker data" << endl;
+    else
+        Logger::Print() << "Error while saving pages checker data" << endl;
 
 }
 
@@ -483,11 +479,13 @@ void MainWindow::on_pushButtonSaveParams_clicked()
     QString filename = QFileDialog::getSaveFileName(this, tr("Select file"), QString(), tr("Neural nets Files (*.nn)"));
     if (filename.length() == 0)
         return;
-    if (filename.split(".").last() != QString("nn")) filename.append(".nn");
+    if (filename.split(".").last() != QString("nn"))
+        filename.append(".nn");
 
     if (checker->SaveParamsNet(filename))
         Logger::Print() << "Params checker data successfully saved" << endl;
-    else Logger::Print() << "Error while saving params checker data" << endl;
+    else
+        Logger::Print() << "Error while saving params checker data" << endl;
 }
 
 void MainWindow::on_pushButtonLoadPages_clicked()
@@ -498,7 +496,8 @@ void MainWindow::on_pushButtonLoadPages_clicked()
 
     if (checker->LoadPagesNet(filename))
         Logger::Print() << "Pages checker data successfully loaded" << endl;
-    else Logger::Print() << "Error while loading pages checker data" << endl;
+    else
+        Logger::Print() << "Error while loading pages checker data" << endl;
 
     SetNetsStatus();
 
@@ -513,7 +512,8 @@ void MainWindow::on_pushButtonLoadParams_clicked()
 
     if (checker->LoadParamsNet(filename))
         Logger::Print() << "Params checker data successfully loaded" << endl;
-    else Logger::Print() << "Error while loading params checker data" << endl;
+    else
+        Logger::Print() << "Error while loading params checker data" << endl;
 
     SetNetsStatus();
 

@@ -8,6 +8,9 @@
 
 using namespace std;
 
+namespace books_checker
+{
+
 class Logger: public std::basic_streambuf<char>
 {
 public:
@@ -93,6 +96,8 @@ protected:
     }
 
 };
+
+}
 
 #endif // LOGGER
 

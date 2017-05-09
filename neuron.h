@@ -31,7 +31,8 @@ public:
     //Allocates memory and initializates values
     void Create(int inputcount, float randgain = 1)
     {
-        WRONG_ARGS_EX(inputcount > 0 && randgain > 0)
+        if (!(inputcount > 0 && randgain > 0))
+            throw WrongInputArgs(__FUNCTION__);
 
         weights.resize(inputcount);
         deltavalues.resize(inputcount);
@@ -50,9 +51,10 @@ public:
     }
 
     //Calculates neuron with formula
-    void Calculate(const QVector<float> &input)
+    void Calculate(const QVector<float>& input)
     {
-        VECTOR_SIZE_EX(input.size() == weights.size())
+        if (!(input.size() == weights.size()))
+            throw WrongInputVectorSize(__FUNCTION__);
 
         float sum = 0; //Store the sum of all values here
         for (int j = 0; j < input.size(); j++)
@@ -64,13 +66,14 @@ public:
         //neurons[i].output=-1 + 2*(1.f + exp(-sum));
     }
 
-    friend QDataStream &operator<<(QDataStream &out, const Neuron &obj)
+    friend QDataStream& operator<<(QDataStream& out, const Neuron& obj)
     {
         out << obj.wgain << obj.gain << obj.alpha << obj.momentum << obj.weights;
         return out;
     }
 
-    friend QDataStream &operator>>(QDataStream &in, Neuron &obj) {
+    friend QDataStream& operator>>(QDataStream& in, Neuron& obj)
+    {
         in >> obj.wgain >> obj.gain >> obj.alpha >> obj.momentum >> obj.weights;
         obj.deltavalues.resize(obj.weights.size());
         return in;
@@ -82,9 +85,10 @@ public:
 class InputNeuron: public Neuron
 {
 public:
-    void Train(const QVector<float> &layerinput, float errsum)
+    void Train(const QVector<float>& layerinput, float errsum)
     {
-        VECTOR_SIZE_EX(layerinput.size() == weights.size())
+        if (!(layerinput.size() == weights.size()))
+            throw WrongInputVectorSize(__FUNCTION__);
 
         float errorc = output * (1 - output) * errsum;
 
@@ -105,9 +109,10 @@ public:
 class HiddenNeuron: public Neuron
 {
 public:
-    float Train(const QVector<float> &layerinput, float errsum)
+    float Train(const QVector<float>& layerinput, float errsum)
     {
-        VECTOR_SIZE_EX(layerinput.size() == weights.size())
+        if (!(layerinput.size() == weights.size()))
+            throw WrongInputVectorSize(__FUNCTION__);
 
         float cerrsum = 0; //Neded for next layer
 
@@ -134,9 +139,10 @@ public:
 class OutputNeuron: public Neuron
 {
 public:
-    float Train(const QVector<float> &layerinput, float desiredoutput)
+    float Train(const QVector<float>& layerinput, float desiredoutput)
     {
-        VECTOR_SIZE_EX(layerinput.size() == weights.size())
+        if (!(layerinput.size() == weights.size()))
+            throw WrongInputVectorSize(__FUNCTION__);
 
         float errsum = 0;
 

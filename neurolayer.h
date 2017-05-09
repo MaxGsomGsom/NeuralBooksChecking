@@ -6,6 +6,9 @@
 namespace Neuronets
 {
 
+template<class T> class LayerIterator;
+template <class T> struct LayerAllocator;
+
 template<class T = Neuron>
 class Layer
 {
@@ -21,16 +24,30 @@ public:
     ~Layer() {} //Destructor
     qint32 InputCount() { return inputsize; } //get layerinput size
     qint32 NeuronsCount() { return neurons.size(); } //get neurons size
+
+    //iterator
+    typedef LayerIterator<T> iterator;
+    friend class LayerIterator<T>;
+    iterator begin() { return iterator(*this, 0); }
+    iterator end() { return iterator(*this, neurons.size() - 1); }
+
+    //allocator
+    typedef LayerAllocator<Layer> allocator;
+    friend class LayerAllocator<Layer>;
+
     T& Neuron(int i) //iterrator
     {
-        OUT_OF_RANGE_EX(i >= 0 && i < neurons.size())
+        if (!(i >= 0 && i < neurons.size()))
+            throw OutOfRange(__FUNCTION__);
+
         return neurons.at(i);
     }
 
     //Creates the layer and allocates memory
     void Create(int inputsize, int neuroncount, float randgain = 1)
     {
-        WRONG_ARGS_EX(inputsize > 0 && neuroncount > 0 && randgain > 0)
+        if (!(inputsize > 0 && neuroncount > 0 && randgain > 0))
+            throw WrongInputArgs(__FUNCTION__);
 
         neurons.resize(neuroncount);
         for (int i = 0; i < neuroncount; i++)
@@ -53,9 +70,10 @@ public:
     }
 
     //Fill layerinput with new elements
-    void PushInput(const QVector<float> &input)
+    void PushInput(const QVector<float>& input)
     {
-        VECTOR_SIZE_EX(input.size() == layerinput.size())
+        if (!(input.size() == layerinput.size()))
+            throw WrongInputVectorSize(__FUNCTION__);
 
         copy(input.begin(), input.end(), layerinput.begin());
     }
@@ -73,7 +91,8 @@ public:
     //Set new neurons parameters
     void SetParams(float gain = 1, float alpha = 0.2, float momentum = 0.1)
     {
-        WRONG_ARGS_EX(gain > 0 && alpha > 0 && alpha < 1 && momentum > 0 && momentum < 1)
+        if (!(gain > 0 && alpha > 0 && alpha < 1 && momentum > 0 && momentum < 1))
+            throw WrongInputArgs(__FUNCTION__);
 
         for (int i = 0; i < neurons.size(); i++)
         {
@@ -83,13 +102,14 @@ public:
         }
     }
 
-    friend QDataStream &operator<<(QDataStream &out, const Layer &obj)
+    friend QDataStream& operator<<(QDataStream& out, const Layer& obj)
     {
         out << obj.neurons << obj.inputsize;
         return out;
     }
 
-    friend QDataStream &operator>>(QDataStream &in, Layer &obj) {
+    friend QDataStream& operator>>(QDataStream& in, Layer& obj)
+    {
         in >> obj.neurons >> obj.inputsize;
         obj.layerinput.resize(obj.inputsize);
         return in;
@@ -139,9 +159,10 @@ template<class T = OutputNeuron>
 class OutputLayer: public Layer<T>
 {
 public:
-    float Train(const QVector<float> &desiredoutput)
+    float Train(const QVector<float>& desiredoutput)
     {
-        VECTOR_SIZE_EX(desiredoutput.size() == this->neurons.size())
+        if (!(desiredoutput.size() == this->neurons.size()))
+            throw WrongInputVectorSize(__FUNCTION__);
 
         float errsum = 0;
         for (int i = 0; i < this->neurons.size(); i++)
@@ -152,9 +173,10 @@ public:
         return errsum;
     }
 
-    float EstimateError(const QVector<float> &desiredoutput)
+    float EstimateError(const QVector<float>& desiredoutput)
     {
-        VECTOR_SIZE_EX(desiredoutput.size() == this->neurons.size())
+        if (!(desiredoutput.size() == this->neurons.size()))
+            throw WrongInputVectorSize(__FUNCTION__);
 
         float errorg = 0;
         for (int i = 0; i < this->neurons.size(); i++)
@@ -165,6 +187,85 @@ public:
         return errorg / 2;
     }
 };
+
+/* ===== iterator for layer ===== */
+
+template<class T>
+class LayerIterator
+{
+private:
+    Layer<T>* container;
+    uint position;
+public:
+    LayerIterator(Layer<T>& container, uint position)
+    {
+        this->container = &container;
+        this->position = position;
+    }
+    bool operator==(LayerIterator& other)
+    {
+        return (container == (other.container) && position == other.position);
+    }
+    bool operator!=(LayerIterator& other)
+    {
+        return !(*this == other);
+    }
+
+    T& operator*()
+    {
+        if (position < 0 || (position > container->neurons.size() - 1))
+            throw OutOfRange(__FUNCTION__);
+        return container->neurons.data()[position];
+    }
+
+    LayerIterator& operator++()
+    {
+        ++position;
+        return *this;
+    }
+
+    LayerIterator& operator--()
+    {
+        --position;
+        return *this;
+    }
+};
+
+/* ===== allocator for layer ===== */
+
+template <class T>
+struct LayerAllocator
+{
+    typedef T value_type;
+    LayerAllocator() = default;
+    template <class U> LayerAllocator(const LayerAllocator<U>&) {}
+
+    T* allocate(std::size_t n)
+    {
+        T* obj = new T();
+        obj->neurons.resize(n);
+        return static_cast<T*>(obj);
+    }
+
+    void deallocate(T* p, size_t n)
+    {
+        if (p->neurons.size() > 0)
+            p->neurons.clear();
+        delete p;
+    }
+};
+
+template <class T, class U>
+bool operator==(const LayerAllocator<T>&, const LayerAllocator<U>&)
+{
+    return true;
+}
+
+template <class T, class U>
+bool operator!=(const LayerAllocator<T>&, const LayerAllocator<U>&)
+{
+    return false;
+}
 
 }
 

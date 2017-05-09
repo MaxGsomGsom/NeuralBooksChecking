@@ -4,6 +4,9 @@
 #include <books_checker.h>
 #include <QThread>
 
+namespace books_checker
+{
+
 class TrainThread: public QThread
 {
 public:
@@ -28,6 +31,7 @@ private:
     bool trainPages;
     BooksChecker* checker;
 };
+}
 
 #endif // TRAIN_THREAD
 
