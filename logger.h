@@ -34,12 +34,12 @@ public:
     //printing string with current lime
     static ostream& Print()
     {
-        cout << "" << currentDateTime() << " - ";
+        cout << CurrentDateTime << " - ";
         return cout;
     }
 
-private:
-    static string currentDateTime()
+    //manipulator
+    static ostream& CurrentDateTime(ostream &out)
     {
         time_t     now = time(0);
         struct tm  tstruct;
@@ -47,9 +47,12 @@ private:
         tstruct = *localtime(&now);
         strftime(buf, sizeof(buf), "%X", &tstruct);
 
-        return buf;
+        out<<buf;
+
+        return out;
     }
 
+private:
     static void myQDebugMessageHandler(QtMsgType, const QMessageLogContext&, const QString& msg)
     {
         std::cout << msg.toStdString().c_str();

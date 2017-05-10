@@ -50,6 +50,7 @@ public:
             throw WrongInputArgs(__FUNCTION__);
 
         neurons.resize(neuroncount);
+
         for (int i = 0; i < neuroncount; i++)
         {
             neurons[i].Create(inputsize, randgain);
