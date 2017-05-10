@@ -27,5 +27,10 @@ public:
 };
 
 }
+
+#define WrongInputArgs() WrongInputArgs(__FUNCTION__)
+#define OutOfRange() OutOfRange(__FUNCTION__)
+#define WrongInputVectorSize() WrongInputVectorSize(__FUNCTION__)
+
 #endif // EXCEPTIONS
 

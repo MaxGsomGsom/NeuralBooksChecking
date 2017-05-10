@@ -5,7 +5,6 @@
 
 namespace Neuronets
 {
-
 template<class T_in = InputLayer<>, class T_out = OutputLayer<>, class T_hid = HiddenLayer<> >
 class Neuronet
 {
@@ -23,10 +22,12 @@ private:
 
     //Updates the weight values of the network given a desired output
     //and applying the backpropagation algorithm
-    float TrainPattern(const QVector<float> &desiredoutput, const QVector<float> &pattern)
+    float TrainPattern(const QVector<float>& desiredoutput, const QVector<float>& pattern)
     {
-        if(!(desiredoutput.size() == outputsize && pattern.size() == inputsize))
-            throw WrongInputVectorSize(__FUNCTION__);
+        //pre
+        if (!(desiredoutput.size() == outputsize && pattern.size() == inputsize))
+            throw WrongInputVectorSize();
+        //===
 
         //First we begin by propagating the input
         Propagate(pattern);
@@ -61,10 +62,56 @@ public:
 
     T_hid& HiddenLayer(int i)
     {
-        if(!(i < m_hiddenlayers.size() && i >= 0))
-            throw OutOfRange(__FUNCTION__);
+        //pre
+        if (!(i < m_hiddenlayers.size() && i >= 0))
+            throw OutOfRange();
+        //===
 
         return m_hiddenlayers.at(i);
+    }
+
+    bool InvariantTest()
+    {
+        Q_ASSERT(gain > 0);
+        Q_ASSERT(alpha > 0 && alpha <= 1);
+        Q_ASSERT(momentum > 0 && momentum <= 1);
+        Q_ASSERT(inputsize > 0);
+        Q_ASSERT(outputsize > 0);
+        Q_ASSERT(lastError >= 0);
+
+        //test input layer and neurons
+        Q_ASSERT(m_inputlayer.InputCount() == inputsize);
+        m_inputlayer.InvariantTest();
+        for (int k = 0; k < m_inputlayer.NeuronsCount(); ++k)
+        {
+            Q_ASSERT(m_inputlayer.Neuron(k).InputCount() == inputsize);
+        }
+
+        //test output layer and neurons
+        Q_ASSERT(m_outputlayer.NeuronsCount() == outputsize);
+        m_outputlayer.InvariantTest();
+        for (int k = 0; k < m_outputlayer.NeuronsCount(); ++k)
+        {
+            Q_ASSERT(m_outputlayer.Neuron(k).InputCount() == m_hiddenlayers.last().NeuronsCount());
+        }
+
+        //test hidden layers and neurons
+        for (int i = 1; i < m_hiddenlayers.size(); ++i)
+        {
+            Q_ASSERT(m_hiddenlayers[i - 1].NeuronsCount() == m_hiddenlayers[i].InputCount());
+
+            for (int k = 0; k < m_outputlayer.NeuronsCount(); ++k)
+            {
+                Q_ASSERT(m_hiddenlayers[i - 1].NeuronsCount() == m_hiddenlayers[i].Neuron(k).InputCount());
+            }
+        }
+
+        for (int i = 0; i < m_hiddenlayers.size(); ++i)
+        {
+            m_hiddenlayers[i].InvariantTest();
+        }
+
+        return true;
     }
 
     //This is useful to get the output values of the network
@@ -74,10 +121,18 @@ public:
     }
 
     //Creates the network structure on memory
-    void Create(int inputcount, int inputneurons, int outputcount, const QVector<int> &hiddenlayers, float randgain = 1)
+    void Create(int inputcount, int inputneurons, int outputcount, const QVector<int>& hiddenlayers, float randgain = 1)
     {
-        if(!(inputcount > 0 && inputneurons > 0 && outputcount > 0 && randgain > 0))
-            throw WrongInputArgs(__FUNCTION__);
+        //pre
+        if (!(inputcount > 0 && inputneurons > 0 && outputcount > 0 && randgain > 0))
+            throw WrongInputArgs();
+
+        foreach (int hid, hiddenlayers)
+        {
+            if (hid < 0)
+                throw WrongInputArgs();
+        }
+        //===
 
         lastError = 0;
         isTrained = false;
@@ -111,10 +166,12 @@ public:
     }
 
     //Calculates the network values given an input pattern
-    void Propagate(const QVector<float> &input)
+    void Propagate(const QVector<float>& input)
     {
-        if(!(input.size() == inputsize))
-            throw WrongInputVectorSize(__FUNCTION__);
+        //pre
+        if (!(input.size() == inputsize))
+            throw WrongInputVectorSize();
+        //===
 
         //The propagation function should start from the input layer
         //first copy the input vector to the input layer
@@ -146,13 +203,27 @@ public:
     }
 
     //Train all given patterns
-    float TrainAll(const QVector< QVector<float> > &desiredoutputs, const QVector< QVector<float> > &patterns, int maxiteration = 10000, float stoperror = 0.001)
+    float TrainAll(const QVector< QVector<float> >& desiredoutputs, const QVector< QVector<float> >& patterns, int maxiteration = 10000, float stoperror = 0.001)
     {
-        if(!(maxiteration > 0 && stoperror >= 0))
-            throw WrongInputArgs(__FUNCTION__);
+        //pre
+        if (!(maxiteration > 0 && stoperror >= 0))
+            throw WrongInputArgs();
 
-        if(!(desiredoutputs.size() == patterns.size()))
-            throw WrongInputVectorSize(__FUNCTION__);
+        if (!(desiredoutputs.size() == patterns.size()))
+            throw WrongInputVectorSize();
+
+        foreach (QVector<float> vec, desiredoutputs)
+        {
+            if (vec.size() != outputsize)
+                throw WrongInputVectorSize();
+        }
+
+        foreach (QVector<float> vec, patterns)
+        {
+            if (vec.size() != inputsize)
+                throw WrongInputVectorSize();
+        }
+        //===
 
         float error = 0;
         //Start the neural network training
@@ -179,8 +250,10 @@ public:
     //Set neurons params
     void SetParams(float gain = 1, float alpha = 0.2, float momentum = 0.1)
     {
-        if(!(gain > 0 && alpha > 0 && alpha < 1 && momentum > 0 && momentum < 1))
-            throw WrongInputArgs(__FUNCTION__);
+        //pre
+        if (!(gain > 0 && alpha > 0 && alpha <= 1 && momentum > 0 && momentum <= 1))
+            throw WrongInputArgs();
+        //===
 
         this->gain = gain;
         this->alpha = alpha;
@@ -195,16 +268,17 @@ public:
         }
     }
 
-    friend QDataStream &operator<<(QDataStream& out, const Neuronet &obj)
+    friend QDataStream& operator<<(QDataStream& out, const Neuronet& obj)
     {
         out << obj.gain << obj.alpha << obj.momentum << obj.inputsize << obj.outputsize <<
             obj.lastError << obj.isTrained << obj.m_inputlayer << obj.m_outputlayer << obj.m_hiddenlayers;
         return out;
     }
 
-    friend QDataStream &operator>>(QDataStream &in, Neuronet &obj) {
+    friend QDataStream& operator>>(QDataStream& in, Neuronet& obj)
+    {
         in >> obj.gain >> obj.alpha >> obj.momentum >> obj.inputsize >> obj.outputsize >>
-            obj.lastError >> obj.isTrained >> obj.m_inputlayer >> obj.m_outputlayer >> obj.m_hiddenlayers;
+           obj.lastError >> obj.isTrained >> obj.m_inputlayer >> obj.m_outputlayer >> obj.m_hiddenlayers;
         return in;
     }
 };

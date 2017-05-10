@@ -6,14 +6,18 @@
 namespace Neuronets
 {
 
-template<class T> class LayerIterator;
-template <class T> struct LayerAllocator;
+template<class T = Neuron> class Layer;
+template<class T = Neuron> class LayerIterator;
+template <class T = Layer<>> struct LayerAllocator;
 
-template<class T = Neuron>
+
+template<class T>
 class Layer
 {
 private:
     float inputsize;
+    friend class LayerIterator<T>;
+    friend class LayerAllocator<Layer>;
 
 protected:
     QVector<float> layerinput; //The layer input
@@ -27,27 +31,41 @@ public:
 
     //iterator
     typedef LayerIterator<T> iterator;
-    friend class LayerIterator<T>;
     iterator begin() { return iterator(*this, 0); }
     iterator end() { return iterator(*this, neurons.size() - 1); }
 
     //allocator
     typedef LayerAllocator<Layer> allocator;
-    friend class LayerAllocator<Layer>;
+
+    bool InvariantTest()
+    {
+        Q_ASSERT(inputsize == layerinput.size());
+
+        for (int i = 0; i < neurons.size(); ++i)
+        {
+            neurons[i].InvariantTest();
+        }
+
+        return true;
+    }
 
     T& Neuron(int i) //iterrator
     {
+        //pre
         if (!(i >= 0 && i < neurons.size()))
-            throw OutOfRange(__FUNCTION__);
+            throw OutOfRange();
+        //===
 
-        return neurons.at(i);
+        return neurons[i];
     }
 
     //Creates the layer and allocates memory
     void Create(int inputsize, int neuroncount, float randgain = 1)
     {
+        //pre
         if (!(inputsize > 0 && neuroncount > 0 && randgain > 0))
-            throw WrongInputArgs(__FUNCTION__);
+            throw WrongInputArgs();
+        //===
 
         neurons.resize(neuroncount);
 
@@ -73,8 +91,10 @@ public:
     //Fill layerinput with new elements
     void PushInput(const QVector<float>& input)
     {
+        //pre
         if (!(input.size() == layerinput.size()))
-            throw WrongInputVectorSize(__FUNCTION__);
+            throw WrongInputVectorSize();
+        //===
 
         copy(input.begin(), input.end(), layerinput.begin());
     }
@@ -92,8 +112,10 @@ public:
     //Set new neurons parameters
     void SetParams(float gain = 1, float alpha = 0.2, float momentum = 0.1)
     {
+        //pre
         if (!(gain > 0 && alpha > 0 && alpha < 1 && momentum > 0 && momentum < 1))
-            throw WrongInputArgs(__FUNCTION__);
+            throw WrongInputArgs();
+        //===
 
         for (int i = 0; i < neurons.size(); i++)
         {
@@ -162,8 +184,10 @@ class OutputLayer: public Layer<T>
 public:
     float Train(const QVector<float>& desiredoutput)
     {
+        //pre
         if (!(desiredoutput.size() == this->neurons.size()))
-            throw WrongInputVectorSize(__FUNCTION__);
+            throw WrongInputVectorSize();
+        //===
 
         float errsum = 0;
         for (int i = 0; i < this->neurons.size(); i++)
@@ -176,8 +200,10 @@ public:
 
     float EstimateError(const QVector<float>& desiredoutput)
     {
+        //pre
         if (!(desiredoutput.size() == this->neurons.size()))
-            throw WrongInputVectorSize(__FUNCTION__);
+            throw WrongInputVectorSize();
+        //===
 
         float errorg = 0;
         for (int i = 0; i < this->neurons.size(); i++)
@@ -191,7 +217,7 @@ public:
 
 /* ===== iterator for layer ===== */
 
-template<class T>
+template<class T> //must be neuron type
 class LayerIterator
 {
 private:
@@ -215,7 +241,7 @@ public:
     T& operator*()
     {
         if (position < 0 || (position > container->neurons.size() - 1))
-            throw OutOfRange(__FUNCTION__);
+            throw OutOfRange();
         return container->neurons.data()[position];
     }
 
@@ -234,7 +260,7 @@ public:
 
 /* ===== allocator for layer ===== */
 
-template <class T>
+template <class T> //must be layer type
 struct LayerAllocator
 {
     typedef T value_type;

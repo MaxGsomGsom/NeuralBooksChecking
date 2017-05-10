@@ -181,6 +181,8 @@ float BooksChecker::LearnParams()
 //verify page of book
 bool BooksChecker::VerifyPage(QString file)
 {
+    pagesChecker.InvariantTest();
+
     QImage img(file);
     img = img.scaled(IMG_WIDTH, IMG_HEIGHT);
     QVector<float> input;
@@ -201,6 +203,8 @@ bool BooksChecker::VerifyPage(QString file)
 //verify params of book
 bool BooksChecker::VerifyParams(QString params)
 {
+    paramsChecker.InvariantTest();
+
     QVector<float> input;
     QStringList list = params.split(";");
     foreach (QString param, list)
@@ -240,6 +244,8 @@ void BooksChecker::ClearBooksToVerify()
 
 QVector<int> BooksChecker::VerifyBooks()
 {
+    pagesChecker.InvariantTest();
+    paramsChecker.InvariantTest();
 
     QVector<int> result;
 

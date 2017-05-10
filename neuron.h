@@ -28,11 +28,23 @@ public:
     float alpha = 0.2; //Train parameter
     float momentum = 0.1; //Train parameter
 
+    bool InvariantTest()
+    {
+        Q_ASSERT(gain > 0);
+        Q_ASSERT(alpha > 0 && alpha <= 1);
+        Q_ASSERT(momentum > 0 && momentum <= 1);
+        Q_ASSERT(weights.size() == deltavalues.size());
+
+        return true;
+    }
+
     //Allocates memory and initializates values
     void Create(int inputcount, float randgain = 1)
     {
+        //pre
         if (!(inputcount > 0 && randgain > 0))
-            throw WrongInputArgs(__FUNCTION__);
+            throw WrongInputArgs();
+        //===
 
         weights.resize(inputcount);
         deltavalues.resize(inputcount);
@@ -53,8 +65,10 @@ public:
     //Calculates neuron with formula
     void Calculate(const QVector<float>& input)
     {
+        //pre
         if (!(input.size() == weights.size()))
-            throw WrongInputVectorSize(__FUNCTION__);
+            throw WrongInputVectorSize();
+        //===
 
         float sum = 0; //Store the sum of all values here
         for (int j = 0; j < input.size(); j++)
@@ -87,8 +101,10 @@ class InputNeuron: public Neuron
 public:
     void Train(const QVector<float>& layerinput, float errsum)
     {
+        //pre
         if (!(layerinput.size() == weights.size()))
-            throw WrongInputVectorSize(__FUNCTION__);
+            throw WrongInputVectorSize();
+        //===
 
         float errorc = output * (1 - output) * errsum;
 
@@ -111,8 +127,10 @@ class HiddenNeuron: public Neuron
 public:
     float Train(const QVector<float>& layerinput, float errsum)
     {
+        //pre
         if (!(layerinput.size() == weights.size()))
-            throw WrongInputVectorSize(__FUNCTION__);
+            throw WrongInputVectorSize();
+        //===
 
         float cerrsum = 0; //Neded for next layer
 
@@ -141,8 +159,10 @@ class OutputNeuron: public Neuron
 public:
     float Train(const QVector<float>& layerinput, float desiredoutput)
     {
+        //pre
         if (!(layerinput.size() == weights.size()))
-            throw WrongInputVectorSize(__FUNCTION__);
+            throw WrongInputVectorSize();
+        //===
 
         float errsum = 0;
 
