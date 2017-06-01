@@ -23,6 +23,7 @@ public:
     Neuron() {} //Constructor
     ~Neuron() {} //Destructor
     float GetOutput() { return output; } //Get neuron output
+    float GetWGain() { return wgain; } //Get neuron output
     qint32 InputCount() { return weights.size(); } //Get input and weights count
     float gain = 1; //Gain value (default = 1)
     float alpha = 0.2; //Train parameter

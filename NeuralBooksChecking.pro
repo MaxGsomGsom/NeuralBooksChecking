@@ -23,7 +23,8 @@ HEADERS  += mainwindow.h \
     books_checker.h \
     logger.h \
     train_thread.h \
-    neurolayer.h
+    neurolayer.h \
+    graph_vis.h
 
 FORMS    += mainwindow.ui
 
