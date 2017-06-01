@@ -2,6 +2,8 @@
 #define NEURONET_H
 
 #include <neurolayer.h>
+#include <iostream>
+#include "graph_vis.h"
 
 namespace Neuronets
 {
@@ -163,6 +165,10 @@ public:
         {
             m_outputlayer.Create(inputneurons, outputcount, randgain);
         }
+        std::cerr<<"Create()";
+        NeuronNetVis<> nnv;
+        nnv.load(m_inputlayer,m_hiddenlayers[0],m_outputlayer);
+        nnv.generate();
     }
 
     //Calculates the network values given an input pattern
@@ -281,6 +287,44 @@ public:
            obj.lastError >> obj.isTrained >> obj.m_inputlayer >> obj.m_outputlayer >> obj.m_hiddenlayers;
         return in;
     }
+};
+
+class NeuronetTest{
+public:
+    static bool Test01(){
+    Neuronet<> net;
+    QVector< QVector<float> > outp;
+    QVector<float> v = {0.0, 0.1, 0.2, 0.3, 0.4};
+    QVector<float> v1 = {0.0, 0.09, 0.12, 0.29, 0.39};
+    outp.push_back(v);
+    QVector< QVector<float> > patt;
+    patt.push_back(v1);
+    net.TrainAll(outp, patt, 1000, 0.001);
+    return net.IsTrained();
+    }
+    static bool Test02(){
+    Neuronet<> net;
+    QVector< QVector<float> > outp;
+    QVector<float> v = {0.0, 0.1, 0.2, 0.3, 0.4};
+    QVector<float> v1 = {0.0, 0.12, 0.22, 0.32, 0.42};
+    outp.push_back(v);
+    QVector< QVector<float> > patt;
+    patt.push_back(v1);
+    net.TrainAll(outp, patt, 1000, 0.001);
+    return net.IsTrained();
+    }
+    static bool Test03(){
+    Neuronet<> net;
+    QVector< QVector<float> > outp;
+    QVector<float> v = {0.0, 0.1, 0.2, 0.3, 0.4};
+    QVector<float> v1 = {0.5, 0.15, 0.25, 0.35, 0.45};
+    outp.push_back(v);
+    QVector< QVector<float> > patt;
+    patt.push_back(v1);
+    net.TrainAll(outp, patt, 1000, 0.001);
+    return !net.IsTrained();
+    }
+
 };
 
 }
